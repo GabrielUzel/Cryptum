@@ -1,5 +1,7 @@
 defmodule AuthServiceWeb.ErrorView do
-  use AuthServiceWeb, :view
+  import Phoenix.HTML
+  import Phoenix.HTML.Form
+  use PhoenixHTMLHelpers
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

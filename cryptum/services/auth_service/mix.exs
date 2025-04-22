@@ -5,10 +5,6 @@ defmodule AuthService.MixProject do
     [
       app: :auth_service,
       version: "0.1.0",
-      build_path: "../../_build",
-      config_path: "../../config/config.exs",
-      deps_path: "../../deps",
-      lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
@@ -42,13 +38,17 @@ defmodule AuthService.MixProject do
       {:ecto_sql, "~> 3.12.1"},
       {:myxql, ">= 0.7.1"},
       {:phoenix_html, "~> 4.2.1"},
+      {:phoenix_html_helpers, "~> 1.0.1"},
       {:phoenix_live_reload, "~> 1.6.0", only: :dev},
       {:phoenix_live_dashboard, "~> 0.8.6"},
+      {:phoenix_view, "~> 2.0.4"},
+      {:phoenix_live_view, "~> 1.0.10"},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.2.0"},
       {:gettext, "~> 0.26.2"},
       {:jason, "~> 1.4.4"},
-      {:plug_cowboy, "~> 2.7.3"}
+      {:plug_cowboy, "~> 2.7.3"},
+      {:dotenvy, "~> 1.1.0"}
     ]
   end
 

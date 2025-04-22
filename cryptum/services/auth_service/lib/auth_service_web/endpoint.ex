@@ -7,7 +7,7 @@ defmodule AuthServiceWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_auth_service_key",
-    signing_salt: "uu/DzrWT"
+    signing_salt: "9B3RWwd7"
   ]
 
   socket "/socket", AuthServiceWeb.UserSocket,

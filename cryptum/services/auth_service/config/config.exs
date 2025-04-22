@@ -8,16 +8,15 @@
 use Mix.Config
 
 config :auth_service,
-  ecto_repos: [AuthService.Repo],
-  generators: [binary_id: true]
+  ecto_repos: [AuthService.Repo]
 
 # Configures the endpoint
 config :auth_service, AuthServiceWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "/szyIpxOwxKxvcO9dapye+bILUs5IUKMP4Oi9O1kufVmlqY90SJQapiDGoEQri8N",
+  secret_key_base: "sD9lU5+tu26FLXQ//lYmNnqtc9xt54RdZPQtQbSpfJei4zi7cXZz/pVg16Lrlvqv",
   render_errors: [view: AuthServiceWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: AuthService.PubSub,
-  live_view: [signing_salt: "5kRSr6Ap"]
+  live_view: [signing_salt: "DAQyg1qe"]
 
 # Configures Elixir's Logger
 config :logger, :console,
