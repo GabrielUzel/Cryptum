@@ -1,4 +1,4 @@
-defmodule AuthServiceWeb.PageController do
+defmodule AuthServiceWeb.RegisterController do
   use AuthServiceWeb, :controller
 
   def index(conn, _params) do

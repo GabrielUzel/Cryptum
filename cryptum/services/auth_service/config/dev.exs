@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :auth_service, AuthServiceWeb.Endpoint,
   http: [port: 4000],
