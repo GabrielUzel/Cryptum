@@ -19,6 +19,12 @@ defmodule AuthServiceWeb.Router do
     get "/register", RegisterController, :index
   end
 
+  scope "/api/auth", AuthServiceWeb do
+    pipe_through :api
+
+    post "/register", RegisterController, :create
+  end
+
   if Mix.env() in [:dev, :test] do
     import Phoenix.LiveDashboard.Router
 

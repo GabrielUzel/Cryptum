@@ -41,7 +41,8 @@ defmodule AuthService.MixProject do
       {:gettext, "~> 0.26.2"},
       {:jason, "~> 1.4.4"},
       {:plug_cowboy, "~> 2.7.3"},
-      {:dotenvy, "~> 1.1.0"}
+      {:dotenvy, "~> 1.1.0"},
+      {:argon2_elixir, "~> 3.2.1"}
     ]
   end
 
