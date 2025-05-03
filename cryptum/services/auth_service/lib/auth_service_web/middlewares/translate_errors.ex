@@ -1,4 +1,4 @@
-defmodule TranslateErrors do
+defmodule AuthService.TranslateErrors do
   def translate_errors(%Ecto.Changeset{} = changeset) do
     errors = changeset.errors |> Enum.map(fn {field, {message, opts}} ->
       %{
