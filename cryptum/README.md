@@ -1,4 +1,0 @@
-# Cryptum
-
-**TODO: Add description**
-
