@@ -17,12 +17,14 @@ defmodule AuthServiceWeb.Router do
     pipe_through :browser
 
     get "/register", RegisterController, :index
+    get "/login", LoginController, :index
   end
 
   scope "/api/auth", AuthServiceWeb do
     pipe_through :api
 
     post "/register", RegisterController, :create
+    post "/login", LoginController, :authenticate
   end
 
   if Mix.env() in [:dev, :test] do

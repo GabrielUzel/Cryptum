@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
   <body>
-    <header>
-        <h1>TESTE 1</h1>
-    </header>
     <main role="main" class="container">
       <p class="alert alert-info" role="alert"><%= Phoenix.Flash.get(@flash, :info) %></p>
       <p class="alert alert-danger" role="alert"><%= Phoenix.Flash.get(@flash, :error) %></p>

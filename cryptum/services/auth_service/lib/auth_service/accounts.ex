@@ -14,4 +14,8 @@ defmodule AuthService.Accounts do
     user
     |> User.changeset(attrs)
   end
+
+  def get_user() do
+
+  end
 end
