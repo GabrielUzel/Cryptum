@@ -13,6 +13,16 @@ defmodule AuthServiceWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug Guardian.Plug.Pipeline,
+      module: AuthService.GuardianAuth,
+      error_handler: AuthService.GuardianErrorHandler
+
+    plug Guardian.Plug.VerifyHeader
+    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
+  end
+
   scope "/auth", AuthServiceWeb do
     pipe_through :browser
 
@@ -24,7 +34,8 @@ defmodule AuthServiceWeb.Router do
     pipe_through :api
 
     post "/register", RegisterController, :create
-    post "/login", LoginController, :authenticate
+    post "/login", LoginController, :login
+    post "/logout", LoginController, :logout
   end
 
   if Mix.env() in [:dev, :test] do

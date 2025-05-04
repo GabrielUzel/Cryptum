@@ -1,5 +1,5 @@
 defmodule AuthServiceWeb.RegisterController do
-  import TranslateErrors
+  import AuthService.TranslateErrors
   use AuthServiceWeb, :controller
   alias AuthService.Accounts
 

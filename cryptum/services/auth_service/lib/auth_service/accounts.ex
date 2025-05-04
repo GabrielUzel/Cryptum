@@ -15,7 +15,25 @@ defmodule AuthService.Accounts do
     |> User.changeset(attrs)
   end
 
-  def get_user() do
+  def get_user(email) do
+    Repo.get_by(User, email: email)
+  end
 
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
+  def authenticate_user(email, password) do
+    case get_user(email) do
+      nil ->
+        Argon2.no_user_verify()
+        {:error, "Email ou senha inválidos"}
+      user ->
+        if Argon2.verify_pass(password, user.hashed_password) do
+          {:ok, user}
+        else
+          {:error, "Email ou senha inválidos"}
+        end
+    end
   end
 end
