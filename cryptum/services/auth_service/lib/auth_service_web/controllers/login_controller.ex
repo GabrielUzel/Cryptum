@@ -1,5 +1,4 @@
 defmodule AuthServiceWeb.LoginController do
-  # import AuthService.TranslateErrors
   use AuthServiceWeb, :controller
   alias AuthService.Accounts
 
@@ -23,7 +22,7 @@ defmodule AuthServiceWeb.LoginController do
 
     conn
     |> Plug.Conn.put_resp_cookie("auth_token", token, http_only: true, secure: true, max_age: 60 * 60 * 24 * 7)
-    |> redirect(external: "http://localhost:4001/home")
+    |> redirect(external: "http://localhost:4002/home")
   end
 
   defp login_reply({:error, reason}, conn) do

@@ -10,9 +10,13 @@ if Mix.env() in [:dev, :test] do
   ])
 end
 
-config :mailer_service, AuthServiceWeb.Endpoint,
+config :mailer_service, MailerServiceWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: env!("ENDPOINT_SECRET", :string),
   render_errors: [view: MailerServiceWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: MailerService.PubSub,
   live_view: [signing_salt: env!("ENDPOINT_SALT", :string)]
+
+config :mailer_service, MailerService.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
+  api_key: env!("SMTP_API", :string)

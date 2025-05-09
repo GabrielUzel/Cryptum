@@ -5,7 +5,8 @@ defmodule MailerService.Application do
     children = [
       MailerServiceWeb.Telemetry,
       {Phoenix.PubSub, name: MailerService.PubSub},
-      MailerServiceWeb.Endpoint
+      MailerServiceWeb.Endpoint,
+      {Finch, name: MailerService.Finch}
     ]
 
     opts = [strategy: :one_for_one, name: MailerService.Supervisor]
