@@ -19,7 +19,7 @@ erl_crash.dump
 dusk-*.tar
 npm-debug.log
 node_modules/
-services/*/priv/static/
+cryptum/services/*/priv/static/
 npm-debug.log*
 yarn-error.log*
 
