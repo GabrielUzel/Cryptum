@@ -10,6 +10,7 @@ defmodule AuthService.Accounts do
     |> Repo.insert()
   end
 
+  # Unused function, but kept for future use
   def change_user(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)
@@ -19,6 +20,7 @@ defmodule AuthService.Accounts do
     Repo.get_by(User, email: email)
   end
 
+  # Unused function, but kept for future use
   def delete_user(%User{} = user) do
     Repo.delete(user)
   end

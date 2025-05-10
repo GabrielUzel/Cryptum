@@ -2,7 +2,7 @@ const path = require('path');
 const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // Novo plugin
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (env, options) => {
@@ -12,15 +12,15 @@ module.exports = (env, options) => {
     optimization: {
       minimizer: [
         new TerserPlugin({
-          parallel: true,
-          terserOptions: {
-            format: {
-              comments: false,
+            parallel: true,
+            terserOptions: {
+                format: {
+                    comments: false,
+                },
             },
-          },
-          extractComments: false,
+            extractComments: false,
         }),
-        new CssMinimizerPlugin() // Novo plugin CSS
+        new CssMinimizerPlugin() 
       ]
     },
     entry: {

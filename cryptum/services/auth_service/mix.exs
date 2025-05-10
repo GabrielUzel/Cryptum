@@ -43,7 +43,8 @@ defmodule AuthService.MixProject do
       {:plug_cowboy, "~> 2.7.3"},
       {:dotenvy, "~> 1.1.0"},
       {:argon2_elixir, "~> 3.2.1"},
-      {:guardian, "~> 2.3.2"}
+      {:guardian, "~> 2.3.2"},
+      {:httpoison, "~> 2.2.3"}
     ]
   end
 
