@@ -16,7 +16,7 @@ defmodule AuthService.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:name, :email, :password])
-    |> validate_required([:name, :email, :password])
+    |> validate_required([:name, :email, :password], message: "Há campos vazios")
     |> validate_format(:email, ~r/^[\w._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, message: "Email inválido")
     |> validate_length(:password, min: 8)
     |> validate_format(:password, ~r/\d/, message: "A senha deve conter ao menos um número")

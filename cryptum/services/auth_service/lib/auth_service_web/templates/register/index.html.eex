@@ -1,1 +1,70 @@
-<h1>REGISTER</h1>
+<div class="register_body">
+    <h1>Crie sua conta</h1>
+    <div class="auth_error_div hidden">
+
+    </div>
+    <form class="register_form" onsubmit="handleSubmit(event)">
+        <div class="auth_input_div">
+            <input class="auth_input" type="text" id="name" name="name" placeholder="Nome">
+            <input class="auth_input" type="text" id="email" name="email" placeholder="Email">
+            <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
+            <input class="auth_input" type="password" id="password_confirm" name="password_confirm" placeholder="Confirmar senha">
+        </div>
+        <button class="submit_button" type="submit">Criar conta</button>
+    </form>
+</div>
+<script>
+    const loginForm = document.querySelector(".login_form");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const passwordConfirmInput = document.getElementById("password_confirm");
+    const authErrorDiv = document.querySelector(".auth_error_div");
+    const csrfToken = document.querySelector("meta[name='csrf-token']").content;
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        if (passwordInput.value !== passwordConfirmInput.value) {
+            authErrorDiv.classList.remove("hidden");
+            authErrorDiv.innerHTML = "As senhas não coincidem";
+            return;
+        }
+
+        fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json", 
+                "x-csrf-token": csrfToken
+            },
+            body: JSON.stringify({
+                name: nameInput.value,
+                email: emailInput.value,
+                password: passwordInput.value
+            })
+        }).then((response) => {
+            if (!response.ok) {
+                response.json().then((data) => {
+                    if (data.message) {
+                        authErrorDiv.classList.remove("hidden");
+                        authErrorDiv.innerHTML = data.message;
+                        return;
+                    }
+
+                    let errorMessages = "";
+
+                    data.errors.forEach(error => {
+                        errorMessages = error.message;
+                        // adicionar um ícone de erro para cada field
+                    });
+
+                    authErrorDiv.classList.remove("hidden");
+                    authErrorDiv.innerHTML = errorMessages;
+                });
+            } 
+        }).catch (error => {
+            console.log("bad request", error);
+        });
+    }
+</script>
+
