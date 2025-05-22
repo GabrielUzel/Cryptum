@@ -1,0 +1,15 @@
+@use "../layout.scss" as vars;
+
+.register_body {
+    background-color: #ffffff;
+    @include vars.flexbox_column;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    padding: 50px;
+}
+
+.register_form {
+    @include vars.flexbox_column;
+    gap: 70px;
+}

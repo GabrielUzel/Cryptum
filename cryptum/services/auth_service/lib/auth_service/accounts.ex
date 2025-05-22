@@ -34,7 +34,7 @@ defmodule AuthService.Accounts do
         if Argon2.verify_pass(password, user.hashed_password) do
           {:ok, user}
         else
-          {:error, "Email ou senha inválidos"}
+          {:error, "Senha incorreta"}
         end
     end
   end

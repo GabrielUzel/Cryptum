@@ -1,1 +1,50 @@
-<h1>LOGIN</h1>
+<div class="login_body">
+    <h1>Entre com sua conta</h1>
+    <div class="auth_error_div hidden">
+
+    </div>
+    <form class="login_form" onsubmit="handleSubmit(event)">
+        <div class="auth_input_div">
+            <input class="auth_input" type="text" id="email" name="email" placeholder="Email">
+            <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
+        </div>
+        <button class="submit_button" type="submit">Login</button>
+    </form>
+</div>
+<script>
+    const loginForm = document.querySelector(".login_form");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const authErrorDiv = document.querySelector(".auth_error_div");
+    const csrfToken = document.querySelector("meta[name='csrf-token']").content;
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        try {
+            fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", 
+                    "x-csrf-token": csrfToken
+                },
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    password: passwordInput.value
+                })
+            }).then((response) => {
+                if (response.ok) {
+                    window.location.href = "/home";
+                } else {
+                    response.json().then((data) => {
+                        authErrorDiv.classList.remove("hidden");
+                        authErrorDiv.innerHTML = data.message;
+                    });
+                }
+            });
+        } catch (error) {
+            authErrorDiv.classList.remove("hidden");
+            authErrorDiv.innerHTML = "Error no servidor";
+        }
+    }
+</script>

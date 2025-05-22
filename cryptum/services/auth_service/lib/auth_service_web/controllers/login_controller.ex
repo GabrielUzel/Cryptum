@@ -6,7 +6,7 @@ defmodule AuthServiceWeb.LoginController do
     render(conn, "index.html")
   end
 
-  def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
+  def login(conn, %{"email" => email, "password" => password}) do
     Accounts.authenticate_user(email, password)
     |> login_reply(conn)
   end
@@ -28,10 +28,6 @@ defmodule AuthServiceWeb.LoginController do
   defp login_reply({:error, reason}, conn) do
     conn
     |> put_status(:bad_request)
-    |> json(%{
-      errors: [
-        %{message: to_string(reason)}
-      ]
-    })
+    |> json(%{ message: to_string(reason) })
   end
 end

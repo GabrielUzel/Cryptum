@@ -7,37 +7,60 @@ defmodule AuthServiceWeb.RegisterController do
     render(conn, "index.html")
   end
 
-  def create(conn, %{"user" => user_params}) do
-    case Accounts.get_user(user_params["email"]) do
-      nil ->
-        token = Phoenix.Token.sign(
-          AuthServiceWeb.Endpoint,
-          "confirm",
-          %{
-            email: user_params["email"],
-            name: user_params["name"],
-            password: user_params["password"]
-          },
-          max_age: 86400);
+  def create(conn, %{ "name" => name, "email" => email, "password" => password}) do
+    changeset = AuthService.Accounts.User.changeset(%AuthService.Accounts.User{}, %{"name" => name, "email" => email, "password" => password})
 
-          confirmation_url = AuthServiceWeb.Router.Helpers.url(conn) <> "/auth/register/confirm?token=#{token}"
+    if changeset.valid? do
+      case Accounts.get_user(email) do
+        nil ->
+          token = Phoenix.Token.sign(
+            AuthServiceWeb.Endpoint,
+            "confirm",
+            %{
+              email: email,
+              name: name,
+              password: password
+            },
+            max_age: 86400);
 
-          body = %{
-            email: user_params["email"],
-            link: confirmation_url
-          } |> Jason.encode!()
+            confirmation_url = AuthServiceWeb.Router.Helpers.url(conn) <> "/auth/register/confirm?token=#{token}"
 
-          HTTPoison.post!("http://localhost:4001/api/auth/confirm/register", body, [
-            {"Content-Type", "application/json"}
-          ])
+            body = %{
+              email: email,
+              link: confirmation_url
+            } |> Jason.encode!()
 
+            HTTPoison.post!("http://localhost:4001/api/auth/confirm/register", body, [
+              {"Content-Type", "application/json"}
+            ])
+
+            conn
+            |> put_status(:accepted)
+            |> json(%{message: "Email de confirmação enviado. Verifique sua caixa de entrada."})
+        _user ->
           conn
-          |> put_status(:accepted)
-          |> json(%{message: "Email de confirmação enviado. Verifique sua caixa de entrada."})
-      _user ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Email já cadastrado"})
+          |> put_status(:bad_request)
+          |> json(%{error: "Email já cadastrado"})
+      end
+    else
+      errors =
+      Ecto.Changeset.traverse_errors(changeset, fn {error_message, error_options} ->
+        Enum.reduce(error_options, error_message, fn {option_key, option_value}, formatted_message ->
+          String.replace(formatted_message, "%{#{option_key}}", to_string(option_value))
+        end)
+      end)
+      |> Enum.flat_map(fn {field, messages} ->
+        Enum.map(messages, fn message ->
+          %{
+            field: to_string(field),
+            message: message
+          }
+        end)
+      end)
+
+      conn
+      |> put_status(:bad_request)
+      |> json(%{errors: errors})
     end
   end
 
