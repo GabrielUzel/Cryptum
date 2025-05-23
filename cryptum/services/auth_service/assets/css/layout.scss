@@ -8,6 +8,7 @@ $error-red: #FF1D15;
 @mixin flexbox_column {
     display: flex;
     flex-direction: column;
+    justify-content: center
 };
 
 html, body {
@@ -42,6 +43,8 @@ html, body {
     padding: 10px;
     font-size: 20px;
     cursor: pointer;
+    width: 150px;
+    align-self: center;
 }
 
 .submit_button:hover {

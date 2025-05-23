@@ -28,6 +28,7 @@ defmodule AuthServiceWeb.Router do
 
     get "/register", RegisterController, :index
     get "/login", LoginController, :index
+    get "/forgotpassword", ForgotPasswordController, :index
     get "/register/confirm", RegisterController, :confirm_email
   end
 

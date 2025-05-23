@@ -18,5 +18,10 @@ body {
 
 .login_form {
     @include vars.flexbox_column;
-    gap: 70px;
+    gap: 50px;
+}
+
+.forgot_password_link {
+    margin-top: 20px;
+    color: #000000;
 }

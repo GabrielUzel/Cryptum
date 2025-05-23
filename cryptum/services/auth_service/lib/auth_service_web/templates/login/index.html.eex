@@ -7,6 +7,7 @@
         <div class="auth_input_div">
             <input class="auth_input" type="text" id="email" name="email" placeholder="Email">
             <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
+            <a class="forgot_password_link" href="/auth/forgotpassword">Esqueci minha senha</a>
         </div>
         <button class="submit_button" type="submit">Login</button>
     </form>
