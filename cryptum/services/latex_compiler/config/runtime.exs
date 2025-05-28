@@ -14,5 +14,4 @@ config :latex_compiler, LatexCompilerWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: env!("ENDPOINT_SECRET", :string),
   render_errors: [view: LatexCompilerWeb.ErrorView, accepts: ~w(json), layout: false],
-  pubsub_server: LatexCompiler.PubSub,
-  live_view: [signing_salt: env!("ENDPOINT_SALT", :string)]
+  pubsub_server: LatexCompiler.PubSub

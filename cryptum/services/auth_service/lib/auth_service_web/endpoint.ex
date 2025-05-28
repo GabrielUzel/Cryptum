@@ -17,7 +17,7 @@ defmodule AuthServiceWeb.Endpoint do
     at: "/",
     from: :auth_service,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(css fonts images js)
 
   if code_reloading? do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket

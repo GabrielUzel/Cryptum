@@ -13,9 +13,8 @@ end
 config :mailer_service, MailerServiceWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: env!("ENDPOINT_SECRET", :string),
-  render_errors: [view: MailerServiceWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: MailerService.PubSub,
-  live_view: [signing_salt: env!("ENDPOINT_SALT", :string)]
+  render_errors: [view: MailerServiceWeb.ErrorView, accepts: ~w(json), layout: false],
+  pubsub_server: MailerService.PubSub
 
 config :mailer_service, MailerService.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,

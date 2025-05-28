@@ -27,8 +27,6 @@ defmodule MailerService.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.21"},
-      {:phoenix_html_helpers, "~> 1.0.1"},
-      {:phoenix_live_dashboard, "~> 0.8.6"},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.2.0"},
       {:gettext, "~> 0.26.2"},
@@ -44,7 +42,7 @@ defmodule MailerService.MixProject do
 
   defp aliases do
     [
-      setup: ["deps.get", "cmd npm install --prefix assets"]
+      setup: ["deps.get"]
     ]
   end
 end
