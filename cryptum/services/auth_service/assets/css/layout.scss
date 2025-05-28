@@ -8,7 +8,8 @@ $error-red: #FF1D15;
 @mixin flexbox_column {
     display: flex;
     flex-direction: column;
-    justify-content: center
+    justify-content: center;
+    border-radius: 15px;
 };
 
 html, body {
@@ -63,4 +64,12 @@ html, body {
 
 .hidden {
     visibility: hidden;
+}
+
+.auth_toggle_password {
+    position: relative;
+    right: 7%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
 }

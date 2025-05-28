@@ -7,8 +7,27 @@
         <div class="auth_input_div">
             <input class="auth_input" type="text" id="name" name="name" placeholder="Nome">
             <input class="auth_input" type="text" id="email" name="email" placeholder="Email">
-            <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
-            <input class="auth_input" type="password" id="password_confirm" name="password_confirm" placeholder="Confirmar senha">
+            <div>
+                <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
+                <img
+                    id="toggle-password-icon"
+                    class="auth_toggle_password"
+                    src="/images/eye-slash.svg"
+                    alt="Mostrar senha"
+                    onclick="togglePasswordVisibility(this)"
+                    data-target="password"
+                />
+            </div>
+            <div>
+                <input class="auth_input" type="password" id="password_confirm" name="password_confirm" placeholder="Confirmar senha">
+                <img
+                    class="auth_toggle_password"
+                    src="/images/eye-slash.svg"
+                    alt="Mostrar senha"
+                    onclick="togglePasswordVisibility(this)"
+                    data-target="password_confirm"
+                />
+            </div>
         </div>
         <button class="submit_button" type="submit">Criar conta</button>
     </form>
@@ -55,7 +74,6 @@
 
                     data.errors.forEach(error => {
                         errorMessages = error.message;
-                        // adicionar um ícone de erro para cada field
                     });
 
                     authErrorDiv.classList.remove("hidden");
@@ -65,6 +83,16 @@
         }).catch (error => {
             console.log("bad request", error);
         });
+    }
+
+    togglePasswordVisibility = (iconElement) => {
+        const inputId = iconElement.dataset.target;
+        const passwordInputForEye = document.getElementById(inputId);
+        const isPassword = passwordInputForEye.type === 'password';
+
+        passwordInputForEye.type = isPassword ? 'text' : 'password';
+        iconElement.src = isPassword ? '/images/eye.svg' : '/images/eye-slash.svg';
+        iconElement.alt = isPassword ? 'Esconder senha' : 'Mostrar senha';
     }
 </script>
 
