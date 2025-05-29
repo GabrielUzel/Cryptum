@@ -1,0 +1,3 @@
+<h1>Editando: <%= @filename %></h1>
+
+<textarea id="editor" rows="30" cols="100"><%= @content %></textarea>
