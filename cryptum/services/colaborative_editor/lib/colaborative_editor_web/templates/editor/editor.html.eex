@@ -1,3 +1,41 @@
 <h1>Editando: <%= @filename %></h1>
 
-<textarea id="editor" rows="30" cols="100"><%= @content %></textarea>
+<div id="editor" style="height: 400px;"></div>
+
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.21/priv/static/phoenix.js"></script>
+<script>
+    const quill = new Quill('#editor', {
+        theme: 'snow'
+    });
+
+    const editor = document.getElementById("editor");
+    const socket = new Phoenix.Socket("/socket");
+    socket.connect();
+
+    const channel = socket.channel("doc", { filename: "teste.tex" });
+    let quillVersion = 0;
+
+    channel.join()
+        .receive("ok", () => console.log("Joined"))
+        .receive("error", () => console.error("Join error"));
+
+    channel.on("open", (payload) => {
+        quill.setContents(payload.content);
+        quillVersion = payload.version || 0;
+    });
+
+    channel.on("update", ({ change, version }) => {
+        quill.updateContents(change, 'api');
+        quillVersion = version;
+    });
+
+    quill.on('text-change', (delta, _, source) => {
+        if(source === 'user') {
+            channel.push("update", { change: delta, version:quillVersion }).receive("ok", ({ version }) => {
+                quillVersion = version;
+            });
+        }
+    });
+</script>

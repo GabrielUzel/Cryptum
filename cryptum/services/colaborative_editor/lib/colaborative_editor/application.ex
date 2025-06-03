@@ -5,7 +5,9 @@ defmodule ColaborativeEditor.Application do
     children = [
       ColaborativeEditorWeb.Telemetry,
       {Phoenix.PubSub, name: ColaborativeEditor.PubSub},
-      ColaborativeEditorWeb.Endpoint
+      ColaborativeEditorWeb.Endpoint,
+      ColaborativeEditor.Document.Supervisor,
+      {Registry, keys: :unique, name: ColaborativeEditor.Registry}
     ]
 
     opts = [strategy: :one_for_one, name: ColaborativeEditor.Supervisor]

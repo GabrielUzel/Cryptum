@@ -3,11 +3,10 @@ defmodule ColaborativeEditorWeb.EditorController do
   alias HTTPoison
 
   # @file_service_url "http://localhost:4005/api"
-  @files_path Path.expand("temp/latex")
 
   def edit_file(conn, %{"filename" => filename}) do
     if String.ends_with?(filename, ".tex") do
-      path = Path.join(@files_path, filename)
+      path = Path.expand("temp/latex/#{filename}")
 
       case File.read(path) do
         {:ok, content} ->
@@ -15,15 +14,15 @@ defmodule ColaborativeEditorWeb.EditorController do
 
         {:error, _reason} ->
           conn
+          |> put_status(:not_found)
           |> json(%{ message: "Arquivo não encontrado" })
       end
     else
       conn
+      |> put_status(:bad_request)
       |> json(%{ message: "Extensão não suportada" })
     end
   end
-
-
 
   # def edit_file(conn, %{"file_id" => file_id}) do
   #   url = "#{@file_service_url}/#{file_id}"
