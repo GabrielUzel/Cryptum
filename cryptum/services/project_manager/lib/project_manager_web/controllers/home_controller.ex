@@ -1,4 +1,4 @@
-defmodule ProjectManagerWeb.PageController do
+defmodule ProjectManagerWeb.HomeController do
   use ProjectManagerWeb, :controller
 
   def index(conn, _params) do

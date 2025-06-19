@@ -43,7 +43,6 @@ defmodule ColaborativeEditorWeb do
       import Phoenix.HTML
       import Phoenix.HTML.Form
       use PhoenixHTMLHelpers
-      use PhoenixHTMLHelpers
 
       import Phoenix.View
 

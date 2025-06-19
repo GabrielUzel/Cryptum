@@ -1,7 +1,7 @@
 import Config
 
 config :latex_compiler, LatexCompilerWeb.Endpoint,
-  http: [port: 4002],
+  http: [port: 4003],
   debug_errors: true,
   code_reloader: true,
   check_origin: false
