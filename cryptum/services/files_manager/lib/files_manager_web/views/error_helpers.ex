@@ -1,5 +1,6 @@
 defmodule FilesManagerWeb.ErrorHelpers do
-  use Phoenix.HTML
+  import Phoenix.HTML.Form
+  use PhoenixHTMLHelpers
 
   def error_tag(form, field) do
     Enum.map(Keyword.get_values(form.errors, field), fn error ->
@@ -9,6 +10,7 @@ defmodule FilesManagerWeb.ErrorHelpers do
       )
     end)
   end
+
   def translate_error({msg, opts}) do
     if count = opts[:count] do
       Gettext.dngettext(FilesManagerWeb.Gettext, "errors", msg, msg, count, opts)

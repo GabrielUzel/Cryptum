@@ -1,5 +1,5 @@
 defmodule FilesManagerWeb.ErrorView do
-  use FilesManagerWeb, :view
+  use PhoenixHTMLHelpers
 
   def template_not_found(template, _assigns) do
     Phoenix.Controller.status_message_from_template(template)
