@@ -6,13 +6,8 @@ config :auth_service, AuthServiceWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
 config :auth_service, AuthServiceWeb.Endpoint,
@@ -21,7 +16,7 @@ config :auth_service, AuthServiceWeb.Endpoint,
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/auth_service_web/(live|views)/.*(ex)$",
-      ~r"lib/auth_service_web/templates/.*(eex)$"
+      ~r"lib/auth_service_web/templates/.*(eex|h  eex)$"
     ]
   ]
 

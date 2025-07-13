@@ -1,69 +1,70 @@
-<div class="login_body">
-    <h1>Entre com sua conta</h1>
-    <div class="auth_error_div hidden">
+<div class="flex flex-col items-center justify-center h-screen">
+  <h1>Entre com sua conta</h1>
+  <div class="">
 
+  </div>
+
+  <form class="" onsubmit="handleSubmit(event)">
+    <div class="">
+      <input class="" type="text" id="email" name="email" placeholder="Email">
+      <div>
+        <input class="" type="password" id="password" name="password" placeholder="Senha">
+        <img
+          class=""
+          src="/images/eye-slash.svg"
+          alt="Mostrar senha"
+          onclick="togglePasswordVisibility()"
+        />
+      </div>
+
+      <a class="" href="/auth/forgotpassword">Esqueci minha senha</a>
     </div>
-    <form class="login_form" onsubmit="handleSubmit(event)">
-        <div class="auth_input_div">
-            <input class="auth_input" type="text" id="email" name="email" placeholder="Email">
-            <div>
-                <input class="auth_input" type="password" id="password" name="password" placeholder="Senha">
-                <img
-                    class="auth_toggle_password"
-                    src="/images/eye-slash.svg"
-                    alt="Mostrar senha"
-                    onclick="togglePasswordVisibility()"
-                />
-            </div>
-
-            <a class="forgot_password_link" href="/auth/forgotpassword">Esqueci minha senha</a>
-        </div>
-        <button class="submit_button" type="submit">Login</button>
-    </form>
+    <button class="" type="submit">Login</button>
+  </form>
 </div>
 <script>
-    const loginForm = document.querySelector(".login_form");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const authErrorDiv = document.querySelector(".auth_error_div");
-    const csrfToken = document.querySelector("meta[name='csrf-token']").content;
-    const toggleIcon = document.querySelector(".auth_toggle_password");
+  const loginForm = document.querySelector(".login_form");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const authErrorDiv = document.querySelector(".auth_error_div");
+  const csrfToken = document.querySelector("meta[name='csrf-token']").content;
+  const toggleIcon = document.querySelector(".auth_toggle_password");
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-        try {
-            fetch("/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json", 
-                    "x-csrf-token": csrfToken
-                },
-                body: JSON.stringify({
-                    email: emailInput.value,
-                    password: passwordInput.value
-                })
-            }).then((response) => {
-                if (response.ok) {
-                    window.location.href = "/home";
-                } else {
-                    response.json().then((data) => {
-                        authErrorDiv.classList.remove("hidden");
-                        authErrorDiv.innerHTML = data.message;
-                    });
-                }
-            });
-        } catch (error) {
+    try {
+      fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", 
+          "x-csrf-token": csrfToken
+        },
+        body: JSON.stringify({
+          email: emailInput.value,
+          password: passwordInput.value
+        })
+      }).then((response) => {
+        if (response.ok) {
+          window.location.href = "/home";
+        } else {
+          response.json().then((data) => {
             authErrorDiv.classList.remove("hidden");
-            authErrorDiv.innerHTML = "Error no servidor";
+            authErrorDiv.innerHTML = data.message;
+          });
         }
+      });
+    } catch (error) {
+      authErrorDiv.classList.remove("hidden");
+      authErrorDiv.innerHTML = "Error no servidor";
     }
+  }
 
-    togglePasswordVisibility = () => {
-        const isPassword = passwordInput.type === 'password';
+  togglePasswordVisibility = () => {
+    const isPassword = passwordInput.type === 'password';
 
-        passwordInput.type = isPassword ? 'text' : 'password';
-        toggleIcon.src = isPassword ? '/images/eye.svg' : '/images/eye-slash.svg';
-        toggleIcon.alt = isPassword ? 'Esconder senha' : 'Mostrar senha';
-    }
+    passwordInput.type = isPassword ? 'text' : 'password';
+    toggleIcon.src = isPassword ? '/images/eye.svg' : '/images/eye-slash.svg';
+    toggleIcon.alt = isPassword ? 'Esconder senha' : 'Mostrar senha';
+  }
 </script>

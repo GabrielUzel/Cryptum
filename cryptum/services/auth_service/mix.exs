@@ -44,16 +44,19 @@ defmodule AuthService.MixProject do
       {:dotenvy, "~> 1.1.0"},
       {:argon2_elixir, "~> 3.2.1"},
       {:guardian, "~> 2.3.2"},
-      {:httpoison, "~> 2.2.3"}
+      {:httpoison, "~> 2.2.3"},
+      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
     ]
   end
 
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd yarn install --prefix assets"],
+      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end
 end

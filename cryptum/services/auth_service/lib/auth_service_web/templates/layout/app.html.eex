@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
   <body>
-    <main role="main" class="container">
+    <main role="main" class="">
       <%= @inner_content %>
     </main>
   </body>
