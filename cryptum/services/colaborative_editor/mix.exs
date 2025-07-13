@@ -41,6 +41,7 @@ defmodule ColaborativeEditor.MixProject do
       {:plug_cowboy, "~> 2.7.3"},
       {:dotenvy, "~> 1.1.0"},
       {:httpoison, "~> 2.2.3"},
+      {:text_delta, "~> 1.4.0"}
     ]
   end
 
