@@ -1,3 +1,0 @@
-defmodule LatexCompiler do
-
-end

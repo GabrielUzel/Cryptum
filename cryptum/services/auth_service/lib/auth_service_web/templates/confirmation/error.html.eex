@@ -1,6 +1,0 @@
-<h1>Error</h1>
-<%= if @flash[:error] do %>
-    <div style="color: red; margin-bottom: 1rem;">
-    <strong>Erro:</strong> <%= @flash[:error] %>
-    </div>
-<% end %>

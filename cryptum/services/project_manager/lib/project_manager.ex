@@ -1,3 +1,0 @@
-defmodule ProjectManager do
-
-end

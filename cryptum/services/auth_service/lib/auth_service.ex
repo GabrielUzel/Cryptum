@@ -1,3 +1,0 @@
-defmodule AuthService do
-
-end

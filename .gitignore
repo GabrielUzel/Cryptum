@@ -17,14 +17,14 @@ erl_crash.dump
 erl_crash.dump
 *.ez
 dusk-*.tar
-npm-debug.log
-node_modules/
-cryptum/services/*/priv/static/
+
 npm-debug.log*
 yarn-error.log*
 
-.vscode
+node_modules/
+cryptum/services/*/priv/static/
 
+.vscode
 logs
 *.log
 
@@ -35,6 +35,29 @@ logs
 
 .env
 .env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 env.sh
 
 *.bat
+
+.next/
+out/
+.next/telemetry.json
+
+.DS_Store
+
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+*.tsbuildinfo
+
+coverage/
+
+*.pem
+*.key
+
+bun.lockb

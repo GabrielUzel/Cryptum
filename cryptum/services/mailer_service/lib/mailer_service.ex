@@ -1,3 +1,0 @@
-defmodule MailerService do
-
-end
