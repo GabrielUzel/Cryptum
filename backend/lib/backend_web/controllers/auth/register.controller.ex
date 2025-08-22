@@ -1,6 +1,8 @@
 defmodule BackendWeb.RegisterController do
   use BackendWeb, :controller
   alias Backend.Accounts
+  alias Backend.TranslateMessages
+  alias BackendWeb.MailerHandler
 
   def create(conn, %{"name" => name, "email" => email, "password" => password}) do
     user_params = %{
@@ -12,38 +14,23 @@ defmodule BackendWeb.RegisterController do
     case Accounts.create_user(user_params) do
       {:ok, _user} ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "confirm", user_params, max_age: 86400)
-        confirmation_url = BackendWeb.Router.Helpers.url(conn) <> "/auth/register/confirm?token=#{token}"
+        confirmation_url = BackendWeb.Endpoint.url() <> "/auth/register/confirm?token=#{token}"
 
-        case Backend.MailerHandler.confirm_register(email, confirmation_url) do
+        case MailerHandler.confirm_register(email, confirmation_url) do
           {:ok, _} ->
             conn
             |> put_status(:created)
-            |> json(%{message: "User created successfully. A confirmation email has been sent."})
+            |> json(TranslateMessages.as_single_success("User created successfully. A confirmation email has been sent."))
           {:error, _} ->
             conn
             |> put_status(:internal_server_error)
-            |> json(%{error: "User created, but failed to send confirmation email."})
+            |> json(TranslateMessages.as_single_error("User created, but failed to send confirmation email."))
         end
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        errors =
-        Ecto.Changeset.traverse_errors(changeset, fn {error_message, error_options} ->
-          Enum.reduce(error_options, error_message, fn {option_key, option_value}, formatted_message ->
-            String.replace(formatted_message, "%{#{option_key}}", to_string(option_value))
-          end)
-        end)
-        |> Enum.flat_map(fn {field, messages} ->
-          Enum.map(messages, fn message ->
-            %{
-              field: to_string(field),
-              message: message
-            }
-          end)
-        end)
-
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{errors: errors})
+        |> json(TranslateMessages.as_error_array(changeset))
     end
   end
 
@@ -54,23 +41,23 @@ defmodule BackendWeb.RegisterController do
           nil ->
             conn
             |> put_status(:not_found)
-            |> json(%{error: "User not found"})
+            |> json(TranslateMessages.as_single_error("User not found"))
           user ->
             case Backend.Accounts.update_user_email_confirmed(user) do
               {:ok, _updated_user} ->
                 conn
                 |> put_status(:ok)
-                |> json(%{message: "Email confirmado com sucesso!"})
+                |> json(TranslateMessages.as_single_success("Email confirmed."))
               {:error, _changeset} ->
                 conn
                 |> put_status(:internal_server_error)
-                |> json(%{error: "Erro ao confirmar e-mail"})
+                |> json(TranslateMessages.as_single_error("Error confirming email."))
             end
         end
       {:error, _} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{error: "Token inválido ou expirado"})
+        |> json(TranslateMessages.as_single_error("Invalid or expired token"))
     end
   end
 end

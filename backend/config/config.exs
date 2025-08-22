@@ -21,8 +21,4 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
-config :backend, Backend.GuardianAuth,
-  issuer: "backend",
-  secret_key: System.get_env("GUARDIAN_SECRET")
-
 import_config "#{config_env()}.exs"

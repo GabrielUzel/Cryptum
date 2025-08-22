@@ -49,7 +49,8 @@ defmodule Backend.MixProject do
       {:swoosh, "~> 1.3"},
       {:gen_smtp, "~> 1.1"},
       {:hackney, "~> 1.23.0"},
-      {:finch, "~> 0.19"}
+      {:finch, "~> 0.19"},
+      {:cors_plug, "~> 3.0"}
     ]
   end
 

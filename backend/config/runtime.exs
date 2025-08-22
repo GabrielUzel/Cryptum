@@ -53,6 +53,10 @@ if config_env() in [:dev, :test] do
     stacktrace: true,
     show_sensitive_data_on_connection_error: true
 
+  config :backend, Backend.GuardianAuth,
+    issuer: "backend",
+    secret_key: env!("GUARDIAN_SECRET")
+
   config :backend, BackendWeb.Endpoint,
     http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
     secret_key_base: env!("SECRET_KEY_BASE", :string),

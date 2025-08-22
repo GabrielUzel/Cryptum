@@ -7,8 +7,8 @@ defmodule BackendWeb.Router do
 
   pipeline :auth do
     plug Guardian.Plug.Pipeline,
-      module: AuthService.GuardianAuth,
-      error_handler: AuthService.GuardianErrorHandler
+      module: Backend.GuardianAuth,
+      error_handler: Backend.GuardianErrorHandler
 
     plug Guardian.Plug.VerifyHeader
     plug Guardian.Plug.EnsureAuthenticated
@@ -27,6 +27,7 @@ defmodule BackendWeb.Router do
     pipe_through [:api, :auth]
 
     post "/logout", LoginController, :logout
+    get "/me", LoginController, :me
   end
 
   scope "/api/editor", BackendWeb do
@@ -35,11 +36,6 @@ defmodule BackendWeb.Router do
     get "/:filename", EditorController, :get_file
   end
 
-  scope "/api/compiler", BackendWeb do
-    pipe_through [:api, :auth]
-
-    post "/compile", CompilerController, :compile
-  end
 
   if Application.compile_env(:backend, :dev_routes) do
     import Phoenix.LiveDashboard.Router

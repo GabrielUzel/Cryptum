@@ -21,7 +21,7 @@ defmodule Backend.Accounts.User do
     |> validate_required(:email, message: "Email cannot be empty")
     |> validate_required(:password, message: "Password cannot be empty")
     |> validate_format(:email, ~r/^[\w._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, message: "Email format invalid")
-    |> validate_length(:password, min: 8)
+    |> validate_length(:password, min: 8, message: "Password must be at least 8 characters long")
     |> validate_format(:password, ~r/\d/, message: "Password must contain at least one number")
     |> unique_constraint(:email, message: "Email already registered")
     |> hash_password

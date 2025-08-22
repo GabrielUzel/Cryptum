@@ -15,6 +15,7 @@ defmodule BackendWeb.Endpoint do
     websocket: true,
    longpoll: false
 
+  plug CORSPlug, origin: ["http://localhost:3000"]
   plug Plug.Static,
     at: "/",
     from: :backend,
