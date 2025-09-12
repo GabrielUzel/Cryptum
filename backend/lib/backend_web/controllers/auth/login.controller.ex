@@ -9,7 +9,7 @@ defmodule BackendWeb.LoginController do
         if user.email_confirmed do
           {:ok, token, _claims} = Backend.GuardianAuth.encode_and_sign(user, %{})
           conn
-          |> Plug.Conn.put_resp_cookie("cryptum_token", token, http_only: true, secure: true, same_site: "Lax", max_age: 60 * 60 * 24 * 7)
+          |> Plug.Conn.put_resp_cookie("cryptum_token", token, http_only: true, secure: false, path: "/", same_site: "Lax", max_age: 60 * 60 * 24 * 7) # ! Está secure: false apenas em dev
           |> json(TranslateMessages.as_single_success("Login successful"))
         else
           conn
@@ -25,14 +25,19 @@ defmodule BackendWeb.LoginController do
 
   def logout(conn, _) do
     conn
-    |> Plug.Conn.delete_resp_cookie("auth_token")
-    |> Plug.Conn.delete_resp_cookie("user_id")
+    |> Plug.Conn.delete_resp_cookie("cryptum_token")
     |> Plug.Conn.put_status(:ok)
     |> json(TranslateMessages.as_single_success("Logout successful"))
   end
 
   def me(conn, _) do
-    user = Guardian.Plug.current_resource(conn)
-    json(conn, %{id: user.id, name: user.name})
+    case Guardian.Plug.current_resource(conn) do
+      nil ->
+        conn
+        |> Plug.Conn.put_status(:unauthorized)
+        |> json(%{error: "Not authenticated"})
+      user ->
+        json(conn, %{id: user.id, name: user.name})
+    end
   end
 end

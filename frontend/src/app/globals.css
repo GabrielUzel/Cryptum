@@ -45,15 +45,15 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --background: #24292e; /* Background color */
+  --foreground: oklch(27.489% 0.03743 19.703);
+  --card: #2b3137; /* Card background color */
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #00171F;
+  --primary: #00171F; /* Primary color */
   --primary-foreground: #fff;
-  --secondary: #003459;
+  --secondary: #003459; /* Secondary color */
   --secondary-foreground: #fff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -119,4 +119,10 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+[data-slot="sidebar-wrapper"] {
+  width: 250px !important;
+  min-width: 250px !important;
+  max-width: 250px !important;
 }

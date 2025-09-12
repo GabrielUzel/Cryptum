@@ -26,7 +26,7 @@ export class UserGateway {
   }
 
   public async logout() {
-    const response = await this.client.post("/auth/logout");
+    const response = await this.client.post("/api/auth/logout");
 
     return response.data;
   }

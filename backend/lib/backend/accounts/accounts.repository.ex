@@ -10,8 +10,12 @@ defmodule Backend.Accounts do
     |> Repo.insert()
   end
 
-  def get_user(email) do
+  def get_user_by_email(email) do
     Repo.get_by(User, email: email)
+  end
+
+  def get_user_by_id(id) do
+    Repo.get(User, id)
   end
 
   # ! Função sem utilidade no momento
@@ -26,7 +30,7 @@ defmodule Backend.Accounts do
   end
 
   def authenticate_user(email, password) do
-    case get_user(email) do
+    case get_user_by_email(email) do
       nil ->
         Argon2.no_user_verify()
         {:error, "Email invalid"}

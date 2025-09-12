@@ -1,5 +1,6 @@
 import { UserGateway } from '@/api/auth/user.gateway';
 import { AxiosError } from 'axios';
+import { useQuery } from '@tanstack/react-query'; 
 
 const userGateway = new UserGateway();
 
@@ -57,7 +58,7 @@ export function useLogin() {
   return { login };
 }
 
-export const useLogout = async () => {
+export const logout = async () => {
   try {
     const data = await userGateway.logout();
     return data;
@@ -101,4 +102,18 @@ export const useRegister = () => {
   };
 
   return { register };
+}
+
+export const useGetUser = () => {
+  return useQuery({
+    queryKey: ['getUser'], 
+      queryFn: async () => {
+      try {
+        const data = await userGateway.getUser();
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    }, 
+  });
 }

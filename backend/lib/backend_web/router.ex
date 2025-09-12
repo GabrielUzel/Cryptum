@@ -6,13 +6,16 @@ defmodule BackendWeb.Router do
   end
 
   pipeline :auth do
+    plug :fetch_session
     plug Guardian.Plug.Pipeline,
+      otp_app: :backend,
       module: Backend.GuardianAuth,
       error_handler: Backend.GuardianErrorHandler
 
-    plug Guardian.Plug.VerifyHeader
-    plug Guardian.Plug.EnsureAuthenticated
+    plug BackendWeb.Plugs.CookieToSession, cookie_key: "cryptum_token", session_key: "guardian_default_token"
+    plug Guardian.Plug.VerifySession, key: "guardian_default"
     plug Guardian.Plug.LoadResource
+    plug Guardian.Plug.EnsureAuthenticated
   end
 
   scope "/api/auth", BackendWeb do
@@ -36,6 +39,21 @@ defmodule BackendWeb.Router do
     get "/:filename", EditorController, :get_file
   end
 
+  scope "/api/projects", BackendWeb do
+    pipe_through [:api, :auth]
+
+    post "/", ProjectController, :create
+    get "/", ProjectController, :list_projects
+    get "/admin", ProjectController, :list_admin_projects
+    get "/member", ProjectController, :list_non_admin_projects
+    put "/:id", ProjectController, :update
+    delete "/:id", ProjectController, :delete
+
+    get "/:project_id/members", ProjectMemberController, :get_project_members
+    post "/:project_id/members", ProjectMemberController, :create
+    put "/:project_id/members/:member_id", ProjectMemberController, :update
+    delete "/:project_id/members/:member_id", ProjectMemberController, :delete
+  end
 
   if Application.compile_env(:backend, :dev_routes) do
     import Phoenix.LiveDashboard.Router

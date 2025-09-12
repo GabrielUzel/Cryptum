@@ -4,9 +4,11 @@ import ErrorMessage from "../@shared/error-message.component";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { useRegister } from "@/hooks/use-user.server";
+import { useRegister } from "@/hooks/use-user";
 import SeePassword from "./see-password.component";
 
+// TODO: Mudar cor de quando dou hover em ua sugestão do input
+// TODO: Mudar cor do focus do input
 export default function RegisterForm() {
   const router = useRouter();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -89,7 +91,12 @@ export default function RegisterForm() {
             <span className="h-5" />
           )}
         </div>
-        <Input id="name" name="name" size={40} />
+        <Input 
+          className="border-background"
+          id="name" 
+          name="name" 
+          size={40} 
+        />
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex justify-between">
@@ -100,7 +107,12 @@ export default function RegisterForm() {
             <span className="h-5" />
           )}
         </div>
-        <Input id="email" name="email" size={40} />
+        <Input 
+          className="border-background"
+          id="email" 
+          name="email" 
+          size={40} 
+        />
       </div>
       <div className="flex flex-col gap-2 relative">
         <div className="flex justify-between">
@@ -113,6 +125,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input 
+            className="border-background"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}
@@ -138,8 +151,9 @@ export default function RegisterForm() {
           )}
         </div>
         <div>
-          <Input 
-            type={isConfirmPasswordVisible ? "text" : "password"} 
+          <Input
+            className="border-background"
+            type={isConfirmPasswordVisible ? "text" : "password"}
             id="confirm_password"
             size={40} 
           />

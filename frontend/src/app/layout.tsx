@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource/inter/index.css";
 import "./globals.css";
 import ReactQueryProvider from "@/providers/react-query.provider";
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,6 +21,10 @@ export default function RootLayout({
           className="font-sans antialiased bg-background text-foreground min-h-screen"
         >
           {children}
+          <Toaster 
+            position="top-center"
+            className="bg-background text-white border border-card"
+          />
         </body>
       </ReactQueryProvider>
     </html>

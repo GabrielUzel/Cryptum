@@ -1,0 +1,61 @@
+import axios, { AxiosInstance } from "axios";
+
+export class ProjectsGateway {
+  private client: AxiosInstance;
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
+      withCredentials: true
+    });
+  }
+
+  public async getProjects(page: number, itemsPerPage: number) {
+    const response = await this.client.get(`/api/projects`, {
+      params: {
+        page,
+        itemsPerPage
+      }
+    });
+
+    return response.data;
+  }
+
+  public async getAdminProjects() {
+    const response = await this.client.get(`/api/projects/admin`);
+
+    return response.data;
+  }
+
+  public async getSharedProjects() {
+    const response = await this.client.get(`/api/projects/member`);
+
+    return response.data;
+  }
+
+  public async createProject(name: string, description: string) {
+    const response = await this.client.post("/api/projects", { 
+      name, 
+      description 
+    });
+
+    return response.data;
+  }
+
+  public async updateProject(projectId: string, name: string, description: string) {
+    const response = await this.client.put(`/api/projects/${projectId}`, { 
+      name, 
+      description 
+    });
+
+    return response.data;
+  }
+
+  public async deleteProject(projectId: string) {
+    const response = await this.client.delete(`/api/projects/${projectId}`);
+
+    return response.data;
+  }
+}
+
+export const userGateway = new ProjectsGateway();

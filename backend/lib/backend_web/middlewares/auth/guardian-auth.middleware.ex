@@ -3,7 +3,7 @@ defmodule Backend.GuardianAuth do
   alias Backend.Accounts
 
   def subject_for_token(user, _claims) do
-    {:ok, to_string(user.email)}
+    {:ok, to_string(user.id)}
   end
 
   def build_claims(claims, resource, _opts) do
@@ -14,8 +14,8 @@ defmodule Backend.GuardianAuth do
     {:ok, claims}
   end
 
-  def resource_from_claims(%{"sub" => email}) do
-    user = Accounts.get_user(email)
+  def resource_from_claims(%{"sub" => id}) do
+    user = Accounts.get_user_by_id(id)
     {:ok, user}
   rescue
     Ecto.NoResultsError -> {:error, :resource_not_found}

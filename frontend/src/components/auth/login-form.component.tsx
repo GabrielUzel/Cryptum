@@ -4,7 +4,7 @@ import ErrorMessage from "../@shared/error-message.component";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { useLogin } from "@/hooks/use-user.server";
+import { useLogin } from "@/hooks/use-user";
 import SeePassword from "./see-password.component";
 
 export default function LoginForm() {
@@ -44,12 +44,18 @@ export default function LoginForm() {
       }
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" size={40} />
+        <Input
+          className="border-background"
+          id="email"
+          name="email"
+          size={40}
+        />
       </div>
       <div className="flex flex-col gap-2 relative">
         <Label htmlFor="password">Senha</Label>
         <div>
           <Input 
+            className="border-background"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}

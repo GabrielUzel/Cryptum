@@ -37,7 +37,7 @@ defmodule BackendWeb.RegisterController do
   def confirm_email(conn, %{"token" => token}) do
     case Phoenix.Token.verify(BackendWeb.Endpoint, "confirm", token, max_age: 86400) do
       {:ok, %{"email" => email}} ->
-        case Backend.Accounts.get_user(email) do
+        case Backend.Accounts.get_user_by_email(email) do
           nil ->
             conn
             |> put_status(:not_found)
