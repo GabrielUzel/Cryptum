@@ -65,6 +65,12 @@ if config_env() in [:dev, :test] do
     debug_errors: true,
     watchers: []
 
+  config :azurex, Azurex.Blob.Config,
+    api_url: env!("AZURE_API_URL", :string),
+    default_container: "projectsfiles",
+    storage_account_name: env!("AZURE_STORAGE_ACCOUNT_NAME", :string),
+    storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY", :string)
+
   config :backend, dev_routes: true
   config :logger, :console, format: "[$level] $message\n"
   config :phoenix, :stacktrace_depth, 20

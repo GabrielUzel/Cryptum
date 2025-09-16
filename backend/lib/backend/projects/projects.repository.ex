@@ -11,6 +11,8 @@ defmodule Backend.ProjectsRepository do
     |> Repo.insert()
   end
 
+  def get_project!(id), do: Repo.get!(Project, id)
+
   def list_projects(user_id, page, page_size) do
     base_query =
       ProjectMember
@@ -94,6 +96,18 @@ defmodule Backend.ProjectsRepository do
   def is_admin?(user_id, project_id) do
     ProjectMember
     |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role == "admin")
+    |> Repo.exists?()
+  end
+
+  def is_at_least_member?(user_id, project_id) do
+    ProjectMember
+    |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role in ["admin", "member"])
+    |> Repo.exists?()
+  end
+
+  def is_at_least_guest?(user_id, project_id) do
+    ProjectMember
+    |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role in ["admin", "member", "guest"])
     |> Repo.exists?()
   end
 

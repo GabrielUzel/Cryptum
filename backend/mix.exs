@@ -44,13 +44,14 @@ defmodule Backend.MixProject do
       {:dotenvy, "~> 1.1.0"},
       {:argon2_elixir, "~> 3.2.1"},
       {:guardian, "~> 2.3.2"},
-      {:httpoison, "~> 2.2.3"},
+      {:httpoison, "~> 1.8"},
       {:text_delta, "~> 1.4.0"},
       {:swoosh, "~> 1.3"},
       {:gen_smtp, "~> 1.1"},
       {:hackney, "~> 1.23.0"},
       {:finch, "~> 0.19"},
-      {:cors_plug, "~> 3.0"}
+      {:cors_plug, "~> 3.0"},
+      {:azurex, "~> 1.1.0"}
     ]
   end
 

@@ -55,6 +55,17 @@ defmodule BackendWeb.Router do
     delete "/:project_id/members/:member_id", ProjectMemberController, :delete
   end
 
+  scope "/api/files", BackendWeb do
+    pipe_through [:api, :auth]
+
+    post "/", FilesController, :create
+    get "/:project_id", FilesController, :list_files
+    get "/:project_id/file/:file_id", FilesController, :download
+    put "/:project_id/file/:file_id", FilesController, :update
+    put "/:project_id/file/:file_id/rename", FilesController, :rename
+    delete "/:project_id/file/:file_id", FilesController, :delete
+  end
+
   if Application.compile_env(:backend, :dev_routes) do
     import Phoenix.LiveDashboard.Router
 
