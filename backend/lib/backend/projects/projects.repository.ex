@@ -4,6 +4,7 @@ defmodule Backend.ProjectsRepository do
 
   alias Backend.Projects.Project
   alias Backend.Projects.ProjectMember
+  alias Backend.Accounts.User
 
   def create_project(name, description) do
     %Project{}
@@ -58,16 +59,21 @@ defmodule Backend.ProjectsRepository do
     |> Repo.all()
   end
 
-	def update_project(id, name, description) do
-		case Repo.get(Project, id) do
-			nil -> {:error, :not_found}
+  def update_project(id, name, description) do
+    case Repo.get(Project, id) do
+      nil -> {:error, :not_found}
 
-			project ->
-				project
-				|> Project.changeset(%{"name" => name, "description" => description})
-				|> Repo.update()
-		end
-	end
+      project ->
+        attrs =
+          %{}
+          |> maybe_put("name", name)
+          |> maybe_put("description", description)
+
+        project
+        |> Project.changeset(attrs)
+        |> Repo.update()
+    end
+  end
 
   def delete_project(id) do
     case Repo.get(Project, id) do
@@ -80,6 +86,14 @@ defmodule Backend.ProjectsRepository do
   def list_project_members(project_id) do
     ProjectMember
     |> where([project_member], project_member.project_id == ^project_id)
+    |> join(:inner, [project_member], user in User, on: user.id == project_member.user_id)
+    |> select([project_member, user], %{
+      id: project_member.id,
+      name: user.name,
+      project_id: project_member.project_id,
+      user_id: user.id,
+      role: project_member.role,
+    })
     |> Repo.all()
   end
 
@@ -131,4 +145,7 @@ defmodule Backend.ProjectsRepository do
       member -> Repo.delete(member)
     end
   end
+
+  defp maybe_put(attrs, _key, value) when value in [nil, ""], do: attrs
+  defp maybe_put(attrs, key, value), do: Map.put(attrs, key, value)
 end

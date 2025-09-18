@@ -51,8 +51,7 @@ defmodule BackendWeb.Router do
 
     get "/:project_id/members", ProjectMemberController, :get_project_members
     post "/:project_id/members", ProjectMemberController, :create
-    put "/:project_id/members/:member_id", ProjectMemberController, :update
-    delete "/:project_id/members/:member_id", ProjectMemberController, :delete
+    put "/:project_id/members/batch", ProjectMemberController, :manage_members
   end
 
   scope "/api/files", BackendWeb do

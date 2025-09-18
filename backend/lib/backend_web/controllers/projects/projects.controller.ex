@@ -20,6 +20,7 @@ defmodule BackendWeb.ProjectController do
     json(conn, projects)
   end
 
+  # TODO: Implementar paginação
   def list_admin_projects(conn, _params) do
     user_id = get_current_user_id(conn)
 
@@ -27,6 +28,7 @@ defmodule BackendWeb.ProjectController do
     json(conn, projects)
   end
 
+  # TODO: Implemetnar paginação
   def list_non_admin_projects(conn, _params) do
     user_id = get_current_user_id(conn)
 
