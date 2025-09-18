@@ -26,6 +26,7 @@ export default function DeleteProjectDialog(
             onClick={() => {
               if (projectId) {
                 onDelete(projectId);
+                setOpen(false);
               }
             }}
             className="!bg-primary hover:!bg-primary/60 cursor-pointer"

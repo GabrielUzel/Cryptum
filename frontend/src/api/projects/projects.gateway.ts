@@ -42,7 +42,7 @@ export class ProjectsGateway {
     return response.data;
   }
 
-  public async updateProject(projectId: string, name: string, description: string) {
+  public async updateProject(projectId: string, name?: string, description?: string) {
     const response = await this.client.put(`/api/projects/${projectId}`, { 
       name, 
       description 

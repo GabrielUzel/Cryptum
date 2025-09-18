@@ -9,7 +9,6 @@ import PaginationContainer from "@/components/@shared/pagination/pagination-cont
 import getVisiblePages from "@/utils/pagination-pages.helper";
 import ProjectsTable from "./projects-table.component";
 
-// TODO: Adicionar funcionalidade aos botões do popover
 export default function Projects() {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useLocalStorage("itemsPerPageOrders", "5");

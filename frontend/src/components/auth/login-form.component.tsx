@@ -45,7 +45,7 @@ export default function LoginForm() {
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
-          className="border-background"
+          className="border-card focus-visible:ring-card focus:!border-card"
           id="email"
           name="email"
           size={40}
@@ -55,7 +55,7 @@ export default function LoginForm() {
         <Label htmlFor="password">Senha</Label>
         <div>
           <Input 
-            className="border-background"
+            className="border-card focus-visible:ring-card focus:!border-card"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}

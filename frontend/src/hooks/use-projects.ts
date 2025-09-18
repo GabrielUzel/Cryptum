@@ -71,7 +71,7 @@ export const createProject = async (name: string, description: string) => {
   }
 }
 
-export const updateProject = async (projectId: string, name: string, description: string) => {
+export const updateProject = async (projectId: string, name?: string, description?: string) => {
   try {
     const data = await projectsGateway.updateProject(projectId, name, description);
     return data;

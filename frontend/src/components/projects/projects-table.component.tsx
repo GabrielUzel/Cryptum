@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   Table,
@@ -14,12 +15,22 @@ import UpdateProjectDialog from "./dialogs/update-dialog.component";
 import DeleteProjectDialog from "./dialogs/delete-dialog.component";
 import ShareProjectDialog from "./dialogs/share-dialog.component";
 import ManageMembersDialog from "./dialogs/manage-members-dialog";
+import { deleteProject, updateProject } from "@/hooks/use-projects";
+import { getProjectMembers, shareProject, manageProjectMembers } from "@/hooks/use-project-members";
+import { toast } from "sonner";
 
 type Project = {
   id: string;
   name: string;
   description: string;
 }
+
+type ProjectMember = {
+  project_id: string;
+  id: string;
+  role: string;
+  name: string;
+};
 
 type ProjectsTableProps = {
   data:Project[];
@@ -33,7 +44,10 @@ export default function ProjectsTable(
   const [openShare, setOpenShare] = useState(false);
   const [openMembers, setOpenMembers] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
   const { data } = props;
+
+  const queryClient = useQueryClient();
 
   const openUpdateDialog = (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -50,27 +64,47 @@ export default function ProjectsTable(
     setOpenShare(true);
   }
 
-  const openManageMembersDialog = (projectId: string) => {
+  const openManageMembersDialog = async (projectId: string) => {
     setSelectedProjectId(projectId);
     setOpenMembers(true);
+
+    await getProjectMembers(projectId).then((data) => {
+      setMembers(data);
+    });
   }
 
-  const onUpdate = (projectId: string, name: string, description: string) => {
-    // Chama hook para atualizar o projeto
-    console.log(projectId, name, description);
+  const onUpdate = async (projectId: string, name?: string, description?: string) => {
+    await updateProject(projectId, name, description);
+    queryClient.invalidateQueries({ queryKey: ['getProjects'] });
+    toast.success("Projeto atualizado com sucesso!");
   }
 
-  const onDelete = (projectId: string) => {
-    // Chama hook para deletar o projeto
-    console.log(projectId);
+  const onDelete = async (projectId: string) => {
+    try {
+      await deleteProject(projectId);
+      queryClient.invalidateQueries({ queryKey: ['getProjects'] });
+      toast.success("Projeto excluído com sucesso!");
+    } catch {
+      toast.error("Houve algum erro, tente novamente mais tarde.");
+    }
   }
 
-  const onShare = (projectId: string) => {
-    // Chama hook para compartilhar o projeto
+  const onShare = async (projectId: string, email: string, role: string) => {
+    try {
+      await shareProject(projectId, email, role);
+      toast.success("Convite enviado com sucesso!");
+    } catch {
+      toast.error("Houve algum erro, tente novamente mais tarde.");
+    }
   }
 
-  const onManageMembers = (projectId: string) => {
-    // Chama hook para gerenciar os membros do projeto
+  const onManageMembers = async (projectId: string, updates: { member_id: string; new_role: string; }[], deletes: {member_id: string}[]) => {
+    try {
+      await manageProjectMembers(projectId, updates, deletes);
+      toast.success("Membros atualizados com sucesso!");
+    } catch {
+      toast.error("Houve algum erro, tente novamente mais tarde.");
+    }
   }
 
   return (
@@ -119,6 +153,8 @@ export default function ProjectsTable(
         </TableBody>
       </Table>
       <UpdateProjectDialog
+        initialName={data?.find(project => project.id === selectedProjectId)?.name || ""}
+        initialDescription={data?.find(project => project.id === selectedProjectId)?.description || ""}
         open={openUpdate}
         setOpen={setOpenUpdate}
         projectId={selectedProjectId}
@@ -130,16 +166,19 @@ export default function ProjectsTable(
         projectId={selectedProjectId}
         onDelete={onDelete}
       />
-      {/* <ShareProjectDialog
+      <ShareProjectDialog
         open={openShare}
         setOpen={setOpenShare}
         projectId={selectedProjectId}
+        onShare={onShare}
       />
       <ManageMembersDialog
         open={openMembers}
         setOpen={setOpenMembers}
         projectId={selectedProjectId}
-      /> */}
+        onManageMembers={onManageMembers}
+        projectMembers={members}
+      />
     </>
   );
 }

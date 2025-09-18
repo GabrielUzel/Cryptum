@@ -54,13 +54,13 @@ export default function CreateProjectDialog(
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="border-card"
+              className="border-card focus-visible:ring-card focus:!border-card"
             />
             <Textarea
               placeholder="Descrição"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              className="border-card"
+              className="border-card focus-visible:ring-card focus:!border-card"
               rows={4}
               maxLength={300}
             />

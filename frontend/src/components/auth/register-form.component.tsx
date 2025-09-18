@@ -7,8 +7,6 @@ import { Label } from "../ui/label";
 import { useRegister } from "@/hooks/use-user";
 import SeePassword from "./see-password.component";
 
-// TODO: Mudar cor de quando dou hover em ua sugestão do input
-// TODO: Mudar cor do focus do input
 export default function RegisterForm() {
   const router = useRouter();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -92,7 +90,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-background"
+          className="border-card focus-visible:ring-card focus:!border-card"
           id="name" 
           name="name" 
           size={40} 
@@ -108,7 +106,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-background"
+          className="border-card focus-visible:ring-card focus:!border-card"
           id="email" 
           name="email" 
           size={40} 
@@ -125,7 +123,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input 
-            className="border-background"
+            className="border-card focus-visible:ring-card focus:!border-card"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}
@@ -152,7 +150,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input
-            className="border-background"
+            className="border-card focus-visible:ring-card focus:!border-card"
             type={isConfirmPasswordVisible ? "text" : "password"}
             id="confirm_password"
             size={40} 
