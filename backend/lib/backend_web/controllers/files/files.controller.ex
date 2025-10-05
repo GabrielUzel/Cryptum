@@ -2,10 +2,10 @@ defmodule BackendWeb.FilesController do
   use BackendWeb, :controller
   alias Backend.Files.FilesService
 
-  def create(conn, %{"project_id" => project_id, "filename" => filename, "content_type" => content_type, "content" => content}) do
+  def create(conn, %{"project_id" => project_id, "filename" => filename, "content_type" => content_type}) do
     user_id = get_current_user_id(conn)
 
-    case FilesService.create_file(user_id, project_id, filename, content_type, content) do
+    case FilesService.create_file(user_id, project_id, filename, content_type) do
       {:ok, file} ->
         json(conn, %{message: "File created", file: file})
 

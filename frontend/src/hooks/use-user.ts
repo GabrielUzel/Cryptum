@@ -15,15 +15,6 @@ interface RegisterBody {
   password: string;
 }
 
-export const useUser = async () => {
-  try {
-    const data = await userGateway.getUser();
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export function useLogin() {
   const login = async (
     body: LoginBody,
@@ -81,8 +72,13 @@ export const useRegister = () => {
     try {
       const data = await userGateway.register(body.name, body.email, body.password);
       onSuccess?.(data);
-    } catch (error) {
-      if (error && typeof error === "object" && "isAxiosError" in error) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        if (error.response?.data.error === "User created, but failed to send confirmation email.") {
+          onError?.([{ error: "Houve algum problema", field: "name" }])
+          return;
+        }
+
         const errorTranslations: Record<string, string> = {
           "Email format invalid": "Formato de email inválido",
           "Email already registered": "Email já cadastrado",
@@ -107,13 +103,13 @@ export const useRegister = () => {
 export const useGetUser = () => {
   return useQuery({
     queryKey: ['getUser'], 
-      queryFn: async () => {
+    queryFn: async () => {
       try {
         const data = await userGateway.getUser();
         return data;
       } catch (error) {
         throw error;
       }
-    }, 
+    },
   });
 }

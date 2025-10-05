@@ -71,9 +71,13 @@ if config_env() in [:dev, :test] do
     storage_account_name: env!("AZURE_STORAGE_ACCOUNT_NAME", :string),
     storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY", :string)
 
+  config :backend, Backend.Mailer,
+    adapter: Swoosh.Adapters.Sendgrid,
+    api_key: env!("SENDGRID_API_KEY", :string)
+
+  config :swoosh, :api_client, Swoosh.ApiClient.Finch
   config :backend, dev_routes: true
   config :logger, :console, format: "[$level] $message\n"
   config :phoenix, :stacktrace_depth, 20
   config :phoenix, :plug_init_mode, :runtime
-  config :swoosh, :api_client, false
 end

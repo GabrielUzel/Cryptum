@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
+import ErrorMessage from "../../@shared/error-message.component";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AxiosError } from "axios";
+import { toast } from "sonner"
 
 type UpdateProjectDialogProps = {
   initialName: string;
@@ -10,7 +13,7 @@ type UpdateProjectDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   projectId: string | null;
-  onUpdate: (projectId: string, name?: string, description?: string) => void;
+  onUpdate: (projectId: string, name?: string, description?: string, setDialogError?: (error: string | null) => void) => void;
 };
 
 export default function UpdateProjectDialog(
@@ -19,6 +22,7 @@ export default function UpdateProjectDialog(
   const { open, setOpen, projectId, onUpdate, initialName, initialDescription } = props;
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -27,20 +31,35 @@ export default function UpdateProjectDialog(
     }
   }, [open, initialName, initialDescription]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
-    if (projectId) {
-      onUpdate(projectId, name, description);
+    setError(null);
+
+    if (!projectId) {
+      return;
     }
-    
-    resetFields();
-    setOpen(false);
+
+    try {
+      await onUpdate(projectId, name, description, setError);
+
+      setOpen(false);
+      resetFields();
+    } catch(error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        setError("Este nome pertence a um projeto que já existe ou os campos são inválidos.");
+        return;
+      }
+
+      toast.error("Erro ao criar arquivo", {
+        description: "Tente novamente mais tarde."
+      });
+    }    
   };
 
   const resetFields = () => {
     setName("");
     setDescription("");
+    setError(null);
   };
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -53,13 +72,17 @@ export default function UpdateProjectDialog(
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="text-white flex flex-col gap-8 border-card" onOpenAutoFocus={event => event.preventDefault()}>
+      <DialogContent className="text-white flex flex-col gap-3 border-card" onOpenAutoFocus={event => event.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Atualizar projeto</DialogTitle>
           <DialogDescription>Atualize o nome e a descrição do projeto.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
+            {error ? 
+              <ErrorMessage direction="row" message={error} textsize="text-sm" /> : 
+              <span className="h-10"></span>
+            }
             <Input
               placeholder="Nome do projeto"
               value={name}

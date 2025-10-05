@@ -2,26 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { logout } from "@/hooks/use-user";
 
 type SidebarUserProps = {
   name: string;
+  handleUserLogout: () => void;
 };
 
 export default function SidebarUser(
   props: SidebarUserProps
 ) {
-  const { name } = props;
-
+  const { name, handleUserLogout } = props;  
+  
   const handleLogout = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    try {
-      console.log("Logging out...");
-      event.preventDefault();
-      await logout();
-      window.location.href = "/";
-    } catch (error) {
-      console.error(error);
-    }
+    event.preventDefault();
+    handleUserLogout();
   }
 
   return (

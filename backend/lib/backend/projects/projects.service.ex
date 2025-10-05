@@ -15,54 +15,66 @@ defmodule Backend.Projects.ProjectsService do
     |> Repo.transaction()
   end
 
-  def get_projects(user_id, page, itemsPerPage) do
-    ProjectsRepository.list_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
-  end
-
-  def get_admin_projects(user_id) do
-    ProjectsRepository.list_admin_projects(user_id)
-  end
-
-  def get_non_admin_projects(user_id) do
-    ProjectsRepository.list_non_admin_projects(user_id)
-  end
-
-  def update_project(user_id, project_id, name, description) do
-    if ProjectsRepository.is_admin?(user_id, project_id) do
-      ProjectsRepository.update_project(project_id, name, description)
+  def get_project(user_id, project_id) do
+    if ProjectsRepository.is_at_least_guest?(user_id, project_id) do
+      ProjectsRepository.get_project(project_id)
     else
       {:error, :not_authorized}
     end
   end
 
-def delete_project(user_id, project_id) do
-  if ProjectsRepository.is_admin?(user_id, project_id) do
-    project = ProjectsRepository.get_project!(project_id)
-
-    Multi.new()
-    |> Multi.run(:delete_blobs, fn _repo, _changes ->
-      files = FilesRepository.list_files_by_project(project_id)
-
-      results =
-        Enum.map(files, fn file ->
-          Blob.delete_blob(file.path)
-        end)
-
-      case Enum.find(results, fn r -> match?({:error, _}, r) end) do
-        nil -> {:ok, :all_blobs_deleted}
-        {:error, reason} -> {:error, reason}
-      end
-    end)
-    |> Multi.delete(:delete_project, project)
-    |> Repo.transaction()
-    |> case do
-      {:ok, _result} -> {:ok, :project_deleted}
-      {:error, _step, reason, _changes} -> {:error, reason}
-    end
-  else
-    {:error, :not_authorized}
+  def get_projects(user_id, page, itemsPerPage) do
+    ProjectsRepository.list_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
   end
-end
+
+  def get_admin_projects(user_id, page, itemsPerPage) do
+    ProjectsRepository.list_admin_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
+  end
+
+  def get_non_admin_projects(user_id, page, itemsPerPage) do
+    ProjectsRepository.list_non_admin_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
+  end
+
+  def update_project(user_id, project_id, name, description) do
+    if String.trim(name) == "" or String.trim(description) == "" do
+      {:error, :required_fields}
+    else
+      if ProjectsRepository.is_admin?(user_id, project_id) do
+        ProjectsRepository.update_project(project_id, name, description)
+      else
+        {:error, :not_authorized}
+      end
+    end
+  end
+
+  def delete_project(user_id, project_id) do
+    if ProjectsRepository.is_admin?(user_id, project_id) do
+      project = ProjectsRepository.get_project(project_id)
+
+      Multi.new()
+      |> Multi.run(:delete_blobs, fn _repo, _changes ->
+        files = FilesRepository.list_files_by_project(project_id)
+
+        results =
+          Enum.map(files, fn file ->
+            Blob.delete_blob(file.path)
+          end)
+
+        case Enum.find(results, fn r -> match?({:error, _}, r) end) do
+          nil -> {:ok, :all_blobs_deleted}
+          {:error, reason} -> {:error, reason}
+        end
+      end)
+      |> Multi.delete(:delete_project, project)
+      |> Repo.transaction()
+      |> case do
+        {:ok, _result} -> {:ok, :project_deleted}
+        {:error, _step, reason, _changes} -> {:error, reason}
+      end
+    else
+      {:error, :not_authorized}
+    end
+  end
 
   def get_project_members(current_user_id, project_id) do
     if ProjectsRepository.is_admin?(current_user_id, project_id) do

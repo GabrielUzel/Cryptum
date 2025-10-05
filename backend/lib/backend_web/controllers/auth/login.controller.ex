@@ -25,7 +25,8 @@ defmodule BackendWeb.LoginController do
 
   def logout(conn, _) do
     conn
-    |> Plug.Conn.delete_resp_cookie("cryptum_token")
+    |> Plug.Conn.delete_resp_cookie("cryptum_token", path: "/")
+    |> Plug.Conn.clear_session()
     |> Plug.Conn.put_status(:ok)
     |> json(TranslateMessages.as_single_success("Logout successful"))
   end

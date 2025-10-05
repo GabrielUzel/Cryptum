@@ -21,14 +21,24 @@ export class ProjectsGateway {
     return response.data;
   }
 
-  public async getAdminProjects() {
-    const response = await this.client.get(`/api/projects/admin`);
+  public async getAdminProjects(page: number, itemsPerPage: number) {
+    const response = await this.client.get(`/api/projects/admin`, {
+      params: {
+        page,
+        itemsPerPage
+      }
+    });
 
     return response.data;
   }
 
-  public async getSharedProjects() {
-    const response = await this.client.get(`/api/projects/member`);
+  public async getSharedProjects(page: number, itemsPerPage: number) {
+    const response = await this.client.get(`/api/projects/member`, {
+      params: {
+        page,
+        itemsPerPage
+      }
+    });
 
     return response.data;
   }
@@ -53,9 +63,13 @@ export class ProjectsGateway {
 
   public async deleteProject(projectId: string) {
     const response = await this.client.delete(`/api/projects/${projectId}`);
+    return response.data;
+  }
 
+  public async getProjectInfo(projectId: string) {
+    const response = await this.client.get(`/api/projects/${projectId}`)
     return response.data;
   }
 }
 
-export const userGateway = new ProjectsGateway();
+export const projectsGateway = new ProjectsGateway();

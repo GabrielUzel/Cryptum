@@ -12,7 +12,12 @@ defmodule Backend.ProjectsRepository do
     |> Repo.insert()
   end
 
-  def get_project!(id), do: Repo.get!(Project, id)
+  def get_project(id) do
+    case Repo.get(Project, id) do
+      nil -> {:error, :not_found}
+      project -> project
+    end
+  end
 
   def list_projects(user_id, page, page_size) do
     base_query =
@@ -43,20 +48,62 @@ defmodule Backend.ProjectsRepository do
     %{projects: projects || [], total_pages: total_pages}
   end
 
-  def list_admin_projects(user_id) do
-    ProjectMember
-    |> where([project_member], project_member.user_id == ^user_id and project_member.role == "admin")
-    |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
-    |> select([_project_member, project], project)
-    |> Repo.all()
+  def list_admin_projects(user_id, page, page_size) do
+    base_query =
+      ProjectMember
+      |> where([pm], pm.user_id == ^user_id and pm.role == "admin")
+      |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
+      |> select([project_member, project], project)
+
+    projects =
+      base_query
+      |> limit(^page_size)
+      |> offset(^(page_size * (page - 1)))
+      |> Repo.all()
+
+    total_count =
+      base_query
+      |> exclude(:select)
+      |> select([_project_member, _project], count("*"))
+      |> Repo.one()
+
+    total_pages =
+      if total_count == 0 do
+        1
+      else
+        :math.ceil(total_count / page_size) |> trunc()
+      end
+
+    %{projects: projects || [], total_pages: total_pages}
   end
 
-  def list_non_admin_projects(user_id) do
-    ProjectMember
-    |> where([project_member], project_member.user_id == ^user_id and project_member.role in ["member", "guest"])
-    |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
-    |> select([_project_member, project], project)
-    |> Repo.all()
+  def list_non_admin_projects(user_id, page, page_size) do
+    base_query =
+      ProjectMember
+      |> where([pm], pm.user_id == ^user_id and pm.role in ["member"])
+      |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
+      |> select([project_member, project], project)
+
+    projects =
+      base_query
+      |> limit(^page_size)
+      |> offset(^(page_size * (page - 1)))
+      |> Repo.all()
+
+    total_count =
+      base_query
+      |> exclude(:select)
+      |> select([_project_member, _project], count("*"))
+      |> Repo.one()
+
+    total_pages =
+      if total_count == 0 do
+        1
+      else
+        :math.ceil(total_count / page_size) |> trunc()
+      end
+
+    %{projects: projects || [], total_pages: total_pages}
   end
 
   def update_project(id, name, description) do

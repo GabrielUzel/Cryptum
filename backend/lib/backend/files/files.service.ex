@@ -4,13 +4,13 @@ defmodule Backend.Files.FilesService do
   alias Backend.ProjectsRepository
   alias Azurex.Blob
 
-  def create_file(user_id, project_id, filename, content_type, content) do
+  def create_file(user_id, project_id, filename, content_type) do
     if !ProjectsRepository.is_at_least_member?(user_id, project_id) do
       {:error, :not_authorized}
     else
       path = "#{project_id}/#{filename}"
 
-      case Blob.put_blob(path, content, content_type) do
+      case Blob.put_blob(path, "", content_type) do
         :ok ->
           case FilesRepository.create_file(project_id, filename, path, content_type) do
             {:ok, file} ->

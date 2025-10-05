@@ -11,6 +11,8 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const { 
     login,
@@ -18,8 +20,6 @@ export default function LoginForm() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const email = (event.currentTarget.elements.namedItem("email") as HTMLInputElement).value;
-    const password = (event.currentTarget.elements.namedItem("password") as HTMLInputElement).value;
 
     if (!email || !password) {
       setError("Email e senha são obrigatórios");
@@ -45,21 +45,26 @@ export default function LoginForm() {
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
-          className="border-card focus-visible:ring-card focus:!border-card"
+          className="border-background focus-visible:ring-card focus:!border-background"
           id="email"
           name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           size={40}
         />
       </div>
       <div className="flex flex-col gap-2 relative">
         <Label htmlFor="password">Senha</Label>
         <div>
-          <Input 
-            className="border-card focus-visible:ring-card focus:!border-card"
-            type={isPasswordVisible ? "text" : "password"} 
-            id="password"
-            size={40}
-          />
+        <Input 
+          className="border-background focus-visible:ring-card focus:!border-background"
+          type={isPasswordVisible ? "text" : "password"} 
+          id="password"
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          size={40}
+        />
           <div className="absolute inset-y-10 right-2 flex items-center">
             <SeePassword
               isVisible={isPasswordVisible}

@@ -7,7 +7,7 @@ defmodule Backend.Application do
       BackendWeb.Telemetry,
       Backend.Repo,
       {Phoenix.PubSub, name: Backend.PubSub},
-      {Finch, name: Backend.Finch},
+      {Finch, name: Swoosh.Finch},
       BackendWeb.Endpoint
     ]
 

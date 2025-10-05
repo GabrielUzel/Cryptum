@@ -68,7 +68,13 @@ defmodule BackendWeb.MailerHandler do
       |> subject("Confirmação de Cadastro")
       |> html_body(email_body)
 
-    Mailer.deliver(email)
+    case Mailer.deliver(email) do
+      {:ok, response} ->
+        {:ok, response}
+      {:error, reason} ->
+        IO.inspect(reason, label: "Email delivery error")
+        {:error, reason}
+    end
   end
 
   def reset_password(user_email) do

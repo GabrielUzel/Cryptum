@@ -11,13 +11,8 @@ type GetProjectsParams = {
 const fetchProjects = async (params: GetProjectsParams) => {
   const { page, itemsPerPage } = params;
 
-  try {
-    const data = await projectsGateway.getProjects(page, itemsPerPage);
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await projectsGateway.getProjects(page, itemsPerPage);
+  return data;
 };
 
 export const getProjectsQueryOptions = (params: GetProjectsParams) => {
@@ -34,12 +29,12 @@ export const useGetProjects = (params: GetProjectsParams) => {
   return useQuery(getProjectsQueryOptions(params));
 }
 
-export const useGetAdminProjects = () => {
+export const useGetAdminProjects = (params: GetProjectsParams) => {
   return useQuery({
     queryKey: ['getAdminProjects'], 
       queryFn: async () => {
       try {
-        const data = await projectsGateway.getAdminProjects();
+        const data = await projectsGateway.getAdminProjects(params.page, params.itemsPerPage);
         return data;
       } catch (error) {
         throw error;
@@ -48,18 +43,30 @@ export const useGetAdminProjects = () => {
   });
 }
 
-export const useGetSharedProjects = () => {
+export const useGetSharedProjects = (params: GetProjectsParams) => {
   return useQuery({
     queryKey: ['getSharedProjects'], 
       queryFn: async () => {
       try {
-        const data = await projectsGateway.getSharedProjects();
+        const data = await projectsGateway.getSharedProjects(params.page, params.itemsPerPage);
         return data;
       } catch (error) {
         throw error;
       }
     }, 
   });
+}
+
+export const useGetProjectsByType = (type: string) => {
+  if(type === "all") {
+    return useGetProjects;
+  }
+
+  if(type === "admin") {
+    return useGetAdminProjects;
+  }
+
+  return useGetSharedProjects;
 }
 
 export const createProject = async (name: string, description: string) => {
@@ -83,6 +90,15 @@ export const updateProject = async (projectId: string, name?: string, descriptio
 export const deleteProject = async (projectId: string) => {
   try {
     const data = await projectsGateway.deleteProject(projectId);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getProjectInfo = async (projectId: string) => {
+  try {
+    const data = await projectsGateway.getProjectInfo(projectId);
     return data;
   } catch (error) {
     throw error;

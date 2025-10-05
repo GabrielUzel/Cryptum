@@ -18,6 +18,7 @@ import ManageMembersDialog from "./dialogs/manage-members-dialog";
 import { deleteProject, updateProject } from "@/hooks/use-projects";
 import { getProjectMembers, shareProject, manageProjectMembers } from "@/hooks/use-project-members";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 type Project = {
   id: string;
@@ -73,10 +74,30 @@ export default function ProjectsTable(
     });
   }
 
-  const onUpdate = async (projectId: string, name?: string, description?: string) => {
-    await updateProject(projectId, name, description);
-    queryClient.invalidateQueries({ queryKey: ['getProjects'] });
-    toast.success("Projeto atualizado com sucesso!");
+  const onUpdate = async (projectId: string, name?: string, description?: string, setDialogError?: (error: string | null) => void) => {    
+    if(setDialogError) {
+      setDialogError(null);
+    }
+
+    try {
+      await updateProject(projectId, name, description);
+      queryClient.invalidateQueries({ queryKey: ['getProjects'] });
+      toast.success("Projeto atualizado com sucesso!");
+    } catch(error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        const errorMessage = "Este nome pertence a um projeto que já existe ou os campos são inválidos.";
+
+        if(setDialogError) {
+          setDialogError(errorMessage);
+        } 
+
+        throw new Error(errorMessage); 
+      }
+
+      toast.error("Erro ao criar arquivo", {
+        description: "Tente novamente mais tarde."
+      });
+    }
   }
 
   const onDelete = async (projectId: string) => {
@@ -121,12 +142,12 @@ export default function ProjectsTable(
             {data?.map((project: Project) => (
             <TableRow key={project.id} className="hover:bg-secondary">
               <TableCell className="p-0">
-                <Link key={project.id} href={`/projects/${project.id}`} className="block w-full h-full p-5">
+                <Link key={project.id} href={`/project/${project.id}`} className="block w-full h-full p-5">
                   {project.name}
                 </Link>
               </TableCell>
               <TableCell className="p-0">
-                <Link key={project.id} href={`/projects/${project.id}`} className="block w-full h-full p-5">
+                <Link key={project.id} href={`/project/${project.id}`} className="block w-full h-full p-5">
                   <Tooltip>
                     <TooltipTrigger>
                       {project.description.length > 30

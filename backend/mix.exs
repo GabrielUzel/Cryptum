@@ -35,7 +35,7 @@ defmodule Backend.MixProject do
       {:phoenix_live_reload, "~> 1.6.0", only: :dev},
       {:phoenix_live_dashboard, "~> 0.8.6"},
       {:phoenix_view, "~> 2.0.4"},
-      {:phoenix_live_view, "~> 1.0.10"},
+      {:phoenix_live_view, "~> 1.1.8"},
       {:telemetry_metrics, "~> 1.1.0"},
       {:telemetry_poller, "~> 1.2.0"},
       {:gettext, "~> 0.26.2"},
@@ -46,10 +46,9 @@ defmodule Backend.MixProject do
       {:guardian, "~> 2.3.2"},
       {:httpoison, "~> 1.8"},
       {:text_delta, "~> 1.4.0"},
-      {:swoosh, "~> 1.3"},
+      {:swoosh, "~> 1.19.8"},
       {:gen_smtp, "~> 1.1"},
-      {:hackney, "~> 1.23.0"},
-      {:finch, "~> 0.19"},
+      {:finch, "~> 0.20"},
       {:cors_plug, "~> 3.0"},
       {:azurex, "~> 1.1.0"}
     ]

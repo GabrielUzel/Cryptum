@@ -90,7 +90,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-card focus-visible:ring-card focus:!border-card"
+          className="border-primary focus-visible:ring-card focus:!border-primary"
           id="name" 
           name="name" 
           size={40} 
@@ -106,7 +106,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-card focus-visible:ring-card focus:!border-card"
+          className="border-primary focus-visible:ring-card focus:!border-primary"
           id="email" 
           name="email" 
           size={40} 
@@ -123,7 +123,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input 
-            className="border-card focus-visible:ring-card focus:!border-card"
+            className="border-primary focus-visible:ring-card focus:!border-primary"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}
@@ -150,7 +150,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input
-            className="border-card focus-visible:ring-card focus:!border-card"
+            className="border-primary focus-visible:ring-card focus:!border-primary"
             type={isConfirmPasswordVisible ? "text" : "password"}
             id="confirm_password"
             size={40} 

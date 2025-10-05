@@ -13,6 +13,13 @@ defmodule BackendWeb.ProjectController do
     end
   end
 
+  def get_project(conn, %{"id" => id}) do
+    user_id = get_current_user_id(conn)
+
+    project = ProjectsService.get_project(user_id, id)
+    json(conn, project)
+  end
+
   def list_projects(conn, %{"page" => page, "itemsPerPage" => itemsPerPage}) do
     user_id = get_current_user_id(conn)
 
@@ -20,19 +27,17 @@ defmodule BackendWeb.ProjectController do
     json(conn, projects)
   end
 
-  # TODO: Implementar paginação
-  def list_admin_projects(conn, _params) do
+  def list_admin_projects(conn, %{"page" => page, "itemsPerPage" => itemsPerPage}) do
     user_id = get_current_user_id(conn)
 
-    projects = ProjectsService.get_admin_projects(user_id)
+    projects = ProjectsService.get_admin_projects(user_id, page, itemsPerPage)
     json(conn, projects)
   end
 
-  # TODO: Implemetnar paginação
-  def list_non_admin_projects(conn, _params) do
+  def list_non_admin_projects(conn, %{"page" => page, "itemsPerPage" => itemsPerPage}) do
     user_id = get_current_user_id(conn)
 
-    projects = ProjectsService.get_non_admin_projects(user_id)
+    projects = ProjectsService.get_non_admin_projects(user_id, page, itemsPerPage)
     json(conn, projects)
   end
 

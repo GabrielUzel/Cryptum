@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import CreateProjectDialog from "../projects/create-project-dialog.component";
 import { Button } from "../ui/button";
@@ -9,11 +10,13 @@ import SidebarLink from "./sidebar-link.component";
 import SidebarUser from "./sidebar-user.component";
 import { useGetUser } from "@/hooks/use-user";
 import { createProject } from "@/hooks/use-projects";
+import { logout } from "@/hooks/use-user";
 import { toast } from "sonner"
 
 export default function SidebarComponent() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const router = useRouter();
   const queryClient = useQueryClient();
   const {
     data: user
@@ -39,6 +42,16 @@ export default function SidebarComponent() {
     }
   }
 
+  const handleUserLogout = async () => {
+    try {
+      await logout();
+      queryClient.resetQueries();
+      router.replace("/");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <SidebarProvider>
       <Sidebar className="!w-[250px] bg-background text-white [&_*]:bg-transparent border-r border-card">
@@ -49,7 +62,10 @@ export default function SidebarComponent() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarLink href="/projects" icon_path="folder-icon.svg" label="Projetos" />
+            <SidebarLink href="/" icon_path="house-icon.svg" label="Início" />
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarLink href="/owner_projects" icon_path="folder-icon.svg" label="Projetos próprios" />
           </SidebarGroup>
           <SidebarGroup>
             <SidebarLink href="/shared_projects" icon_path="users-icon.svg" label="Compartilhados" />
@@ -60,8 +76,8 @@ export default function SidebarComponent() {
         </SidebarContent>
         <SidebarFooter>
           {
-            user ?
-            <SidebarUser name={user.name}/> :
+            user ? 
+            <SidebarUser name={user.name} handleUserLogout={handleUserLogout} /> :
             <SidebarLink href="/auth/login" icon_path="login-icon.svg" label="Entrar" />  
           }
         </SidebarFooter>

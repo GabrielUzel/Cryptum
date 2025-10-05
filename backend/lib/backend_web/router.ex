@@ -22,7 +22,7 @@ defmodule BackendWeb.Router do
     pipe_through :api
 
     post "/register", RegisterController, :create
-    get "/register/confirm", RegisterController, :confirm_email
+    put "/register/confirm", RegisterController, :confirm_email
     post "/login", LoginController, :login
   end
 
@@ -46,6 +46,7 @@ defmodule BackendWeb.Router do
     get "/", ProjectController, :list_projects
     get "/admin", ProjectController, :list_admin_projects
     get "/member", ProjectController, :list_non_admin_projects
+    get "/:id", ProjectController, :get_project
     put "/:id", ProjectController, :update
     delete "/:id", ProjectController, :delete
 

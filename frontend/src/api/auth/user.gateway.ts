@@ -12,7 +12,6 @@ export class UserGateway {
 
   public async getUser() {
     const response = await this.client.get(`/api/auth/me`);
-
     return response.data;
   }
 
@@ -27,7 +26,6 @@ export class UserGateway {
 
   public async logout() {
     const response = await this.client.post("/api/auth/logout");
-
     return response.data;
   }
 
