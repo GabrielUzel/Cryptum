@@ -24,6 +24,8 @@ defmodule BackendWeb.Router do
     post "/register", RegisterController, :create
     put "/register/confirm", RegisterController, :confirm_email
     post "/login", LoginController, :login
+    post "/email-reset-password", LoginController, :email_reset_password
+    put "/reset-password", LoginController, :reset_password
   end
 
   scope "/api/auth", BackendWeb do

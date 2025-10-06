@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 type ShareProjectDialogProps = {
@@ -10,7 +11,7 @@ type ShareProjectDialogProps = {
   onShare: (projectId: string, email: string, role: string) => void;
 };
 
-// TODO: Adicionar select de role
+// TODO: Seleção de role
 export default function ShareProjectDialog(
   props: ShareProjectDialogProps
 ) {
@@ -26,13 +27,18 @@ export default function ShareProjectDialog(
             <DialogTitle>Compartilhar projeto</DialogTitle>
             <DialogDescription>Envie um convite para o email desejado</DialogDescription>
           </DialogHeader>
-          <Input
-            className="border-card focus-visible:ring-card focus:!border-card"
-            id="email"
-            name="email"
-            size={40}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="flex flex-col gap-2">
+            <Label>
+              Email
+            </Label>
+            <Input
+              className="border-card focus-visible:ring-card focus:!border-card"
+              id="email"
+              name="email"
+              size={40}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button

@@ -43,9 +43,13 @@ defmodule Backend.Accounts do
     end
   end
 
-  def update_user_email_confirmed(%User{} = user) do
+  def email_confirmed_changeset(user) do
+    Ecto.Changeset.change(user, email_confirmed: true)
+  end
+
+  def update_user_email_confirmed(user) do
     user
-    |> User.changeset(%{"email_confirmed" => true})
+    |> email_confirmed_changeset()
     |> Repo.update()
   end
 end

@@ -50,7 +50,7 @@ export default function RegisterForm() {
 
     register({ name, email, password }, {
       onSuccess: () => {
-        router.push("/auth/login");
+        router.push("/auth/confirmation-sent");
       },
       onError: (errors: { error: string; field: string; }[]) => {
         const apiErrors: { [key: string]: string } = {};
@@ -90,7 +90,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-primary focus-visible:ring-card focus:!border-primary"
+          className="border-gray-700 focus-visible:ring-card focus:!border-background"
           id="name" 
           name="name" 
           size={40} 
@@ -106,7 +106,7 @@ export default function RegisterForm() {
           )}
         </div>
         <Input 
-          className="border-primary focus-visible:ring-card focus:!border-primary"
+          className="border-gray-700 focus-visible:ring-card focus:!border-background"
           id="email" 
           name="email" 
           size={40} 
@@ -123,7 +123,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input 
-            className="border-primary focus-visible:ring-card focus:!border-primary"
+            className="border-gray-700 focus-visible:ring-card focus:!border-background"
             type={isPasswordVisible ? "text" : "password"} 
             id="password"
             size={40}
@@ -150,7 +150,7 @@ export default function RegisterForm() {
         </div>
         <div>
           <Input
-            className="border-primary focus-visible:ring-card focus:!border-primary"
+            className="border-gray-700 focus-visible:ring-card focus:!border-background"
             type={isConfirmPasswordVisible ? "text" : "password"}
             id="confirm_password"
             size={40} 

@@ -100,6 +100,11 @@ export const useRegister = () => {
   return { register };
 }
 
+export const confirmRegister = async (token: string) => {
+  const data = await userGateway.confirmRegister(token);
+  return data; 
+}
+
 export const useGetUser = () => {
   return useQuery({
     queryKey: ['getUser'], 
@@ -112,4 +117,14 @@ export const useGetUser = () => {
       }
     },
   });
+}
+
+export const sendEmailResetPassword = async (email: string) => {
+  const data = await userGateway.sendEmailResetPassword(email);
+  return data; 
+}
+
+export const resetPassword = async (password: string, token: string) => {
+  const data = await userGateway.resetPassword(password, token);
+  return data;
 }

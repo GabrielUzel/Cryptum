@@ -38,6 +38,31 @@ export class UserGateway {
 
     return response.data;
   }
+
+  public async confirmRegister(token: string) {
+    const response = await this.client.put("/api/auth/register/confirm", {
+      token
+    });
+
+    return response.data;
+  }
+
+  public async sendEmailResetPassword(email: string) {
+    const response = await this.client.post("/api/auth/email-reset-password", {
+      email
+    })
+
+    return response.data;
+  }
+
+  public async resetPassword(password: string, token: string) {
+    const response = await this.client.put("/api/auth/reset-password", {
+      password,
+      token
+    });
+
+    return response.data;
+  }
 }
 
 export const userGateway = new UserGateway();

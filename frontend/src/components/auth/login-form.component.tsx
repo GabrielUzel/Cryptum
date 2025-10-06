@@ -45,7 +45,7 @@ export default function LoginForm() {
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
-          className="border-background focus-visible:ring-card focus:!border-background"
+          className="border-gray-700 focus-visible:ring-card focus:!border-background"
           id="email"
           name="email"
           value={email}
@@ -56,15 +56,15 @@ export default function LoginForm() {
       <div className="flex flex-col gap-2 relative">
         <Label htmlFor="password">Senha</Label>
         <div>
-        <Input 
-          className="border-background focus-visible:ring-card focus:!border-background"
-          type={isPasswordVisible ? "text" : "password"} 
-          id="password"
-          name="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          size={40}
-        />
+          <Input 
+            className="border-gray-700 focus-visible:ring-card focus:!border-background"
+            type={isPasswordVisible ? "text" : "password"} 
+            id="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            size={40}
+          />
           <div className="absolute inset-y-10 right-2 flex items-center">
             <SeePassword
               isVisible={isPasswordVisible}

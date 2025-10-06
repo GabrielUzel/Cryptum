@@ -23,46 +23,27 @@ export const useGetFiles = (projectId: string) => {
 }
 
 export const createFile = async (projectId: string, filename: string) => {
-  try {
-    const data = await filesGateway.createFile(projectId, filename);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await filesGateway.createFile(projectId, filename);
+  return data;
+
 }
 
 export const downloadFile = async (projectId: string, filename: string) => {
-  try {
-    const data = await filesGateway.downloadFile(projectId, filename);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await filesGateway.downloadFile(projectId, filename);
+  return data;
 }
 
 export const updateFile = async (projectId: string, fileId: string, content: string) => {
-  try {
-    const data = await filesGateway.updateFile(projectId, fileId, content);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await filesGateway.updateFile(projectId, fileId, content);
+  return data;
 }
 
 export const renameFile = async (projectId: string, fileId: string, newFileName: string) => {
-  try {
-    const data = await filesGateway.renameFile(projectId, fileId, newFileName);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await filesGateway.renameFile(projectId, fileId, newFileName);
+  return data;
 }
 
 export const deleteFile = async (projectId: string, fileId: string) => {
-  try {
-    const data = await filesGateway.deleteFile(projectId, fileId);
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  const data = await filesGateway.deleteFile(projectId, fileId);
+  return data;
 }

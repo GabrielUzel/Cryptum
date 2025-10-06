@@ -72,8 +72,18 @@ if config_env() in [:dev, :test] do
     storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY", :string)
 
   config :backend, Backend.Mailer,
-    adapter: Swoosh.Adapters.Sendgrid,
-    api_key: env!("SENDGRID_API_KEY", :string)
+    adapter: Swoosh.Adapters.SMTP,
+    relay: "smtp.gmail.com",
+    username: env!("GMAIL_USERNAME", :string),
+    password: env!("GMAIL_APP_PASSWORD", :string),
+    port: 587,
+    ssl: false,
+    tls: :always,
+    auth: :always,
+      tls_options: [
+     verify: :verify_none,
+      versions: [:"tlsv1.2"]
+    ]
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
   config :backend, dev_routes: true
