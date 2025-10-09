@@ -52,8 +52,9 @@ defmodule BackendWeb.Router do
     put "/:id", ProjectController, :update
     delete "/:id", ProjectController, :delete
 
+    post "/add-member", ProjectMemberController, :create
     get "/:project_id/members", ProjectMemberController, :get_project_members
-    post "/:project_id/members", ProjectMemberController, :create
+    post "/:project_id/share", ProjectMemberController, :share
     put "/:project_id/members/batch", ProjectMemberController, :manage_members
   end
 
@@ -61,6 +62,7 @@ defmodule BackendWeb.Router do
     pipe_through [:api, :auth]
 
     post "/", FilesController, :create
+    post "/upload", FilesController, :upload
     get "/:project_id", FilesController, :list_files
     get "/:project_id/file/:file_id", FilesController, :download
     put "/:project_id/file/:file_id", FilesController, :update

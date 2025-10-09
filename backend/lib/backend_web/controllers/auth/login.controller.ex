@@ -1,11 +1,11 @@
 defmodule BackendWeb.LoginController do
   use BackendWeb, :controller
-  alias Backend.Accounts
+  alias Backend.AccountsRepository
   alias Backend.TranslateMessages
   alias BackendWeb.MailerHandler
 
   def login(conn, %{"email" => email, "password" => password}) do
-    case Accounts.authenticate_user(email, password) do
+    case AccountsRepository.authenticate_user(email, password) do
       {:ok, user} ->
         if user.email_confirmed do
           {:ok, token, _claims} = Backend.GuardianAuth.encode_and_sign(user, %{})
@@ -44,7 +44,7 @@ defmodule BackendWeb.LoginController do
   end
 
   def email_reset_password(conn, %{"email" => email}) do
-    case Backend.Accounts.get_user_by_email(email) do
+    case AccountsRepository.get_user_by_email(email) do
       nil ->
         conn
         |> put_status(:ok)
@@ -69,7 +69,7 @@ defmodule BackendWeb.LoginController do
 
   def reset_password(conn, %{"token" => token, "password" => password}) do
     with {:ok, user_id} <- Phoenix.Token.verify(BackendWeb.Endpoint, "reset_password", token, max_age: 3600),
-      user when not is_nil(user) <- Backend.Accounts.get_user_by_id(user_id),
+      user when not is_nil(user) <- AccountsRepository.get_user_by_id(user_id),
       _changeset <- Ecto.Changeset.change(user, %{}),
       {:ok, hashed} <- {:ok, Argon2.hash_pwd_salt(password)},
       {:ok, _updated_user} <- Backend.Repo.update(Ecto.Changeset.change(user, hashed_password: hashed)) do

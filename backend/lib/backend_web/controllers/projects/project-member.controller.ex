@@ -11,11 +11,34 @@ defmodule BackendWeb.ProjectMemberController do
     end
   end
 
-  def create(conn, %{"project_id" => project_id, "role" => role}) do
+  def create(conn, %{"token" => token}) do
+    current_user_id = get_current_user_id(conn)
+
+    if !current_user_id do
+      conn
+      |> send_resp(401, "Not authorized")
+    else
+      case ProjectsService.add_member_to_project(current_user_id, token) do
+        {:ok, _member} ->
+          conn
+          |> send_resp(200, "Project member created")
+
+        {:error, :wrong_user} ->
+          conn
+          |> send_resp(403, "Wrong user")
+
+        {:error, _reason} ->
+          conn
+          |> send_resp(400, "Invalid or expired token")
+      end
+    end
+  end
+
+  def share(conn, %{"project_id" => project_id, "email" => email, "role" => role}) do
     user_id = get_current_user_id(conn)
 
-    case ProjectsService.add_member_to_project(user_id, project_id, role) do
-      {:ok, member} -> json(conn, member)
+    case ProjectsService.share(user_id, project_id, email, role) do
+      {:ok, _} -> json(conn, %{message: "Invite sent"})
       {:error, :not_authorized} -> send_resp(conn, 403, "Not authorized")
       {:error, reason} -> send_resp(conn, 400, inspect(reason))
     end

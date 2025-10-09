@@ -3,9 +3,9 @@ export default function translateRole(role: string) {
     case "admin":
       return "Administrador";
     case "member":
-      return "Membro";
+      return "Editor";
     case "guest":
-      return "Convidado";
+      return "Leitor";
     default:
       return "Unknown";
   }

@@ -25,7 +25,11 @@ export const useGetFiles = (projectId: string) => {
 export const createFile = async (projectId: string, filename: string) => {
   const data = await filesGateway.createFile(projectId, filename);
   return data;
+}
 
+export const uploadFiles = async (projectId: string, files: File[]) => {
+  const data = await filesGateway.uploadFiles(projectId, files);
+  return data;
 }
 
 export const downloadFile = async (projectId: string, filename: string) => {

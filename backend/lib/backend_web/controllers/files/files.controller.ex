@@ -17,6 +17,23 @@ defmodule BackendWeb.FilesController do
     end
   end
 
+  def upload(conn, %{"project_id" => project_id, "files" => files}) do
+    user_id = get_current_user_id(conn)
+
+    case FilesService.upload(user_id, project_id, files) do
+      {:ok, _} ->
+        json(conn, %{message: "Files uploded"})
+
+      {:error, :not_authorized} ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "User does not have sufficient role"})
+
+      {:error, reason} ->
+        send_resp(conn, 400, Jason.encode!(Backend.TranslateMessages.as_single_error("Failed to upload files: #{inspect(reason)}")))
+    end
+  end
+
   def list_files(conn, %{"project_id" => project_id}) do
     user_id = get_current_user_id(conn)
 

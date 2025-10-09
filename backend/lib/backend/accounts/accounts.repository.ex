@@ -1,4 +1,4 @@
-defmodule Backend.Accounts do
+defmodule Backend.AccountsRepository do
   import Ecto.Query, warn: false
   alias Backend.Repo
 

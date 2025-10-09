@@ -12,7 +12,6 @@ export class ProjectMembersGateway {
 
   public async getProjectMembers(projectId: string) {
     const response = await this.client.get(`/api/projects/${projectId}/members`);
-
     return response.data;
   }
 
@@ -21,6 +20,14 @@ export class ProjectMembersGateway {
       email,
       role
     });
+
+    return response.data;
+  }
+
+  public async createProjectMember(token: string) {
+    const response  = await this.client.post(`/api/projects/add-member`, {
+      token
+    }) 
 
     return response.data;
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ErrorMessage from "../@shared/error-message.component";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -9,10 +9,12 @@ import SeePassword from "./see-password.component";
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const redirect = searchParams.get("redirect") || "/";
 
   const { 
     login,
@@ -28,7 +30,7 @@ export default function LoginForm() {
 
     login({ email, password }, {
       onSuccess: () => {
-        router.push("/");
+        router.push(redirect);
       },
       onError: (error: Error) => {
         setError(error.message);

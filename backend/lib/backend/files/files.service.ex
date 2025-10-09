@@ -8,7 +8,8 @@ defmodule Backend.Files.FilesService do
     if !ProjectsRepository.is_at_least_member?(user_id, project_id) do
       {:error, :not_authorized}
     else
-      path = "#{project_id}/#{filename}"
+      encoded_filename = URI.encode(filename)
+      path = "#{project_id}/#{encoded_filename}"
 
       case Blob.put_blob(path, "", content_type) do
         :ok ->
@@ -21,6 +22,39 @@ defmodule Backend.Files.FilesService do
           end
         {:error, reason} ->
           {:error, reason}
+      end
+    end
+  end
+
+  def upload(user_id, project_id, files) do
+    if !ProjectsRepository.is_at_least_member?(user_id, project_id) do
+      {:error, :not_authorized}
+    else
+      files_list = List.wrap(files)
+
+      results =
+        Enum.map(files_list, fn file ->
+          filename = file.filename
+          content_type = file.content_type
+
+          case File.read(file.path) do
+            {:ok, content} ->
+              upload_single_file(project_id, filename, content_type, content)
+
+            {:error, reason} ->
+              {:error, {:read_file_failed, reason}}
+          end
+        end)
+
+      case Enum.find(results, fn result -> elem(result, 0) == :error end) do
+        {:error, reason} ->
+          {:error, reason}
+
+        nil ->
+          successful_files =
+            Enum.map(results, fn {:ok, file} -> file end)
+
+          {:ok, successful_files}
       end
     end
   end
@@ -122,6 +156,24 @@ defmodule Backend.Files.FilesService do
           {:error, reason} -> {:error, reason}
         end
       end
+    end
+  end
+
+  defp upload_single_file(project_id, filename, content_type, content) do
+    encoded_filename = URI.encode(filename)
+    path = "#{project_id}/#{encoded_filename}"
+
+    case Blob.put_blob(path, content, content_type) do
+      :ok ->
+        case FilesRepository.create_file(project_id, filename, path, content_type) do
+          {:ok, file} ->
+            {:ok, file}
+
+          {:error, changeset} ->
+            {:error, changeset}
+        end
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end

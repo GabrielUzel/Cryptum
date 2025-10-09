@@ -20,6 +20,23 @@ export class FilesGateway {
     return response.data;
   }
 
+  public async uploadFiles(projectId: string, files: File[]) {
+    const formData = new FormData();
+    formData.append("project_id", projectId);
+
+    files.forEach((file) => {
+      formData.append("files[]", file); 
+    });
+
+    const response = await this.client.post(`/api/files/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  }
+
   public async getFiles(projectId: string) {
     const response = await this.client.get(`/api/files/${projectId}`);
     return response.data;

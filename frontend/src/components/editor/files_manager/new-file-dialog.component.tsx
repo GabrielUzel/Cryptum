@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner"
 import { createFile } from "@/hooks/use-files";
 import { AxiosError } from "axios";
+import UploadFile from "./upload-file.component";
 
 const REQUIRED_EXTENSION = ".tex";
-const DEFAULT_NAME = "main";
+const DEFAULT_NAME = "novo_arquivo";
 
 type NewFileDialogProps = {
   projectId: string;
@@ -24,6 +25,9 @@ export default function NewFileDialog(
   const [open, setOpen] = useState(false);
   const [fileName, setFileName] = useState(DEFAULT_NAME + REQUIRED_EXTENSION);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"new" | "upload">("new");
+  const buttonSelectedStyle = "bg-card";
+  const buttonNotSelectedStyle = "bg-transparent";
 
   const queryClient = useQueryClient();
 
@@ -86,43 +90,68 @@ export default function NewFileDialog(
           </Image>
         </Button>
       </DialogTrigger>
-      <DialogContent className="text-white flex flex-col gap-8 border-card">
-        <DialogHeader>
-          <DialogTitle>Criar novo arquivo</DialogTitle>
-          <DialogDescription>Digite o nome do arquivo.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            {error ? 
-              <ErrorMessage direction="row" message={error} textsize="text-sm" /> : 
-              <span className="h-5"></span>
-            }
-            <Label>
-              Nome do arquivo
-            </Label>
-            <Input
-              placeholder=""
-              value={fileName}
-              onChange={e => setFileName(e.target.value)}  
-              className="border-card focus-visible:ring-card focus:!border-card"
-            />
-          </div>
-          <DialogFooter>
-            <Button type="submit" className="!bg-primary hover:!bg-primary/60 cursor-pointer">
-              Criar
+      <DialogContent className="border-card text-white flex gap-8">
+        <div className="flex flex-col gap-4">
+          <Button 
+              onClick={() => setActiveTab("new")}
+              className={`w-full cursor-pointer hover:bg-card ${activeTab === "new" ? buttonSelectedStyle : buttonNotSelectedStyle}`}
+            >
+              Novo arquivo
             </Button>
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="!bg-card hover:!bg-card/60 hover:!text-white cursor-pointer"
-                onClick={resetFields}
-              >
-                Cancelar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </form>
+            <Button 
+              onClick={() => setActiveTab("upload")}
+              className={`w-full cursor-pointer hover:bg-card ${activeTab === "upload" ? buttonSelectedStyle : buttonNotSelectedStyle}`}
+            >
+              Upload
+            </Button>
+        </div>
+        <div className="flex flex-col gap-8 ">
+          {activeTab === "new" ? (
+            <div>
+              <DialogHeader>
+                <DialogTitle>Criar novo arquivo</DialogTitle>
+                <DialogDescription>Digite o nome do arquivo.</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+                <div className="flex flex-col gap-8">
+                  {error ? 
+                    <ErrorMessage direction="row" message={error} textsize="text-sm" /> : 
+                    <span className="h-5"></span>
+                  }
+                  <div className="flex flex-col gap-2">
+                    <Label>
+                      Nome do arquivo
+                    </Label>
+                    <Input
+                      placeholder=""
+                      value={fileName}
+                      onChange={e => setFileName(e.target.value)}  
+                      className="border-card focus-visible:ring-card focus:!border-card"
+                      size={40}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" className="!bg-primary hover:!bg-primary/60 cursor-pointer">
+                    Criar
+                  </Button>
+                  <DialogClose asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="!bg-card hover:!bg-card/60 hover:!text-white cursor-pointer"
+                      onClick={resetFields}
+                    >
+                      Cancelar
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </div>
+          ) : (
+            <UploadFile projectId={projectId}/>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

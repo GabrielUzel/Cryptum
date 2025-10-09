@@ -1,6 +1,6 @@
 defmodule BackendWeb.RegisterController do
   use BackendWeb, :controller
-  alias Backend.Accounts
+  alias Backend.AccountsRepository
   alias Backend.TranslateMessages
   alias BackendWeb.MailerHandler
 
@@ -11,7 +11,7 @@ defmodule BackendWeb.RegisterController do
       "password" => password
     }
 
-    case Accounts.create_user(user_params) do
+    case AccountsRepository.create_user(user_params) do
       {:ok, user} ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "confirm", user.id, max_age: 86400)
         frontend_base_url = Application.get_env(:backend, :frontend_url) || "http://localhost:3000"
@@ -22,10 +22,10 @@ defmodule BackendWeb.RegisterController do
             conn
             |> put_status(:created)
             |> json(TranslateMessages.as_single_success("User created successfully. A confirmation email has been sent."))
-          {:error, _} -> # TODO: Delete user
+          {:error, _} ->
             conn
             |> put_status(:internal_server_error)
-            |> json(TranslateMessages.as_single_error("User created, but failed to send confirmation email."))
+            |> json(TranslateMessages.as_single_error("User created, but failed to send confirmation email.")) # TODO: User still exists if email failed, delete user if this happens
         end
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -38,13 +38,13 @@ defmodule BackendWeb.RegisterController do
   def confirm_email(conn, %{"token" => token}) do
       case Phoenix.Token.verify(BackendWeb.Endpoint, "confirm", token, max_age: 86400) do
         {:ok, user_id} ->
-          case Backend.Accounts.get_user_by_id(user_id) do
+          case AccountsRepository.get_user_by_id(user_id) do
             nil ->
               conn
               |> put_status(:not_found)
               |> json(TranslateMessages.as_single_error("User not found"))
             user ->
-              case Backend.Accounts.update_user_email_confirmed(user) do
+              case AccountsRepository.update_user_email_confirmed(user) do
                 {:ok, _updated_user} ->
                   conn
                   |> put_status(:ok)

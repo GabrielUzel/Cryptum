@@ -1,6 +1,6 @@
 defmodule Backend.GuardianAuth do
   use Guardian, otp_app: :backend
-  alias Backend.Accounts
+  alias Backend.AccountsRepository
 
   def subject_for_token(user, _claims) do
     {:ok, to_string(user.id)}
@@ -15,7 +15,7 @@ defmodule Backend.GuardianAuth do
   end
 
   def resource_from_claims(%{"sub" => id}) do
-    user = Accounts.get_user_by_id(id)
+    user = AccountsRepository.get_user_by_id(id)
     {:ok, user}
   rescue
     Ecto.NoResultsError -> {:error, :resource_not_found}

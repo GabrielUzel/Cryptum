@@ -18,7 +18,7 @@ export default function MemberCard(
   props: MemberCardProps
 ) {
   const { isAdmin, markedForDelete } = props;
-
+  
   return (
     <Card className={`p-2 bg-card border-card ${isAdmin ? "text-gray-500" : "text-white"} ${markedForDelete ? "opacity-50 line-through" : "bg-card"}`}>
       {!isAdmin ? 
@@ -31,8 +31,8 @@ export default function MemberCard(
                   <SelectValue placeholder={translateRole(props.role)} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-card text-white">
-                  <SelectItem className="p-2 cursor-pointer data-[highlighted]:bg-primary data-[highlighted]:text-white" value="member">Membro</SelectItem>
-                  <SelectItem className="p-2 cursor-pointer data-[highlighted]:bg-primary data-[highlighted]:text-white" value="guest">Convidado</SelectItem>
+                  <SelectItem className="p-2 cursor-pointer data-[highlighted]:bg-primary data-[highlighted]:text-white" value="member">Editor</SelectItem>
+                  <SelectItem className="p-2 cursor-pointer data-[highlighted]:bg-primary data-[highlighted]:text-white" value="guest">Leitor</SelectItem>
                 </SelectContent>
               </Select>
               <Button
