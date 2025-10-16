@@ -3,17 +3,12 @@ defmodule Backend.Document do
   alias Backend.Document.Supervisor
   alias TextDelta
   alias Backend.DeltaConverter
+  alias Backend.Files.FilesService
+
+  @save_interval 5_000
 
   def start_link(filename) do
     GenServer.start_link(__MODULE__, filename, name: name(filename))
-  end
-
-  def get_contents(filename) do
-    GenServer.call(name(filename), :get_contents)
-  end
-
-  def update(filename, change, version) do
-    GenServer.call(name(filename), {:update, change, version})
   end
 
   def open(filename) do
@@ -26,6 +21,14 @@ defmodule Backend.Document do
     end
   end
 
+  def get_contents(filename) do
+    GenServer.call(name(filename), :get_contents)
+  end
+
+  def update(filename, change, version) do
+    GenServer.call(name(filename), {:update, change, version})
+  end
+
   @impl true
   def init(filename) do
     path = Path.expand("temp/latex/#{filename}")
@@ -36,13 +39,20 @@ defmodule Backend.Document do
         {:error, _} -> ""
       end
 
-    quill_delta = %{
-      "ops" => [%{"insert" => content}]
-    }
-
+    quill_delta = %{"ops" => [%{"insert" => content}]}
     text_delta = DeltaConverter.quill_to_text_delta(quill_delta)
 
-    {:ok, %{filename: filename, content: text_delta, version: 0, changes: []}}
+    state = %{
+      filename: filename,
+      content: text_delta,
+      version: 0,
+      changes: [],
+      dirty: false
+    }
+
+    Process.send_after(self(), :autosave, @save_interval)
+
+    {:ok, state}
   end
 
   @impl true
@@ -64,7 +74,7 @@ defmodule Backend.Document do
       state.changes
       |> Enum.take(edits_since)
       |> Enum.reverse()
-      |> Enum.reduce(client_change_converted, &TextDelta.transform(&1, &2, true))
+      |> Enum.reduce(client_change_converted, &TextDelta.transform(&1, &2, :right))
 
     new_content = TextDelta.compose(state.content, transformed_change)
 
@@ -72,14 +82,36 @@ defmodule Backend.Document do
       state
       | version: state.version + 1,
         changes: [transformed_change | state.changes],
-        content: new_content
+        content: new_content,
+        dirty: true
     }
 
     path = Path.expand("temp/latex/#{new_state.filename}")
     File.write!(path, extract_text(new_content.ops))
 
-    response = %{version: new_state.version, change: DeltaConverter.text_delta_to_quill(transformed_change)}
+    response = %{
+      version: new_state.version,
+      change: DeltaConverter.text_delta_to_quill(transformed_change)
+    }
+
     {:reply, {:ok, response}, new_state}
+  end
+
+  @impl true
+  def handle_info(:autosave, state) do
+    if state.dirty do
+      quill_content = DeltaConverter.text_delta_to_quill(state.content)
+
+      case FilesService.update_file(nil, nil, state.filename, quill_content) do
+        {:ok, _file} -> :ok
+        {:error, reason} ->
+          IO.puts("Erro ao salvar arquivo automaticamente: #{inspect(reason)}")
+      end
+    end
+
+    new_state = %{state | dirty: false}
+    Process.send_after(self(), :autosave, @save_interval)
+    {:noreply, new_state}
   end
 
   defp name(filename), do: {:via, Registry, {Backend.Registry, filename}}

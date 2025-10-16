@@ -3,7 +3,7 @@ defmodule BackendWeb.DocumentChannel do
   alias Backend.Document
 
   @impl true
-  def join("doc", %{"filename" => filename}, socket) do
+  def join("document:" <> filename, _payload, socket) do
     {:ok, _pid} = Document.open(filename)
     socket = assign(socket, :filename, filename)
     send(self(), :after_join)

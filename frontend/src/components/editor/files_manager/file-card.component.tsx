@@ -14,12 +14,13 @@ type FileCardProps = {
   fileId: string;
   fileName: string;
   fileExtension: string;
+  onClick?: () => void;
 }
 
 export default function FileCard(
   props: FileCardProps
 ) {
-  const { projectId, fileId, fileName, fileExtension } = props;
+  const { projectId, fileId, fileName, fileExtension, onClick } = props;
   const [openRename, setOpenRename] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -85,7 +86,7 @@ export default function FileCard(
 
   return(
     <>
-      <Card className="flex flex-row items-center justify-between p-3 border-none shadow-none bg-card hover:brightness-150 cursor-pointer rounded-none">
+      <Card className="flex flex-row items-center justify-between p-3 border-none shadow-none bg-card hover:brightness-150 cursor-pointer rounded-none" onClick={onClick}>
         <div className="flex gap-3">
           <div className="w-5 h-5 relative">
             <Image

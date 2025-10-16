@@ -3,6 +3,7 @@ import FileCard from "./file-card.component";
 
 type FilesListProps = {
   projectId: string
+  onSelectFile: (fileId: string) => void;
 }
 
 type File = {
@@ -13,7 +14,7 @@ type File = {
 export default function FilesList(
   props: FilesListProps
 ) {
-  const { projectId } = props;
+  const { projectId, onSelectFile } = props;
   const { data } = useGetFiles(projectId);
 
   return(
@@ -31,6 +32,7 @@ export default function FilesList(
               fileId={file.id}
               fileName={fullName}
               fileExtension={extension}
+              onClick={() => onSelectFile(file.id)}
             />
           );
         })}

@@ -8,7 +8,9 @@ defmodule Backend.Application do
       Backend.Repo,
       {Phoenix.PubSub, name: Backend.PubSub},
       {Finch, name: Swoosh.Finch},
-      BackendWeb.Endpoint
+      BackendWeb.Endpoint,
+      {Registry, keys: :unique, name: Backend.Registry},
+      {DynamicSupervisor, strategy: :one_for_one, name: Backend.Document.Supervisor}
     ]
 
     opts = [strategy: :one_for_one, name: Backend.Supervisor]
