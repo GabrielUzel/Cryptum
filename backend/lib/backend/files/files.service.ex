@@ -26,6 +26,22 @@ defmodule Backend.Files.FilesService do
     end
   end
 
+  def get_document_content(file_id) do
+    case FilesRepository.get_file(file_id) do
+      nil ->
+        {:error, :not_found}
+
+      file ->
+        case Blob.get_blob(file.path) do
+          {:ok, content} ->
+            {:ok, content}
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
   def upload(user_id, project_id, files) do
     if !ProjectsRepository.is_at_least_member?(user_id, project_id) do
       {:error, :not_authorized}

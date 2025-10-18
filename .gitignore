@@ -61,3 +61,4 @@ coverage/
 *.key
 
 bun.lockb
+/backend/temp/latex/

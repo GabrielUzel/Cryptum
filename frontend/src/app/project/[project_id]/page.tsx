@@ -32,7 +32,7 @@ export default function ProjectPage() {
   return (
     <div className="flex flex-col gap-4 text-white h-screen">
       <ProjectMenubar title={data?.name} />
-      <div className="flex flex-1 gap-4 mx-4 mb-4">
+      <div className="flex flex-1 gap-4 mx-4 mb-4 overflow-hidden">
         <FilesManager projectId={project_id} onSelectFile={setCurrentFileId} />
         <ClientOnly>
           {currentFileId ? 

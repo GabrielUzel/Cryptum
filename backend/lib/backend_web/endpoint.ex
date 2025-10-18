@@ -4,7 +4,8 @@ defmodule BackendWeb.Endpoint do
     store: :cookie,
     key: "_backend_key",
     signing_salt: "/3xzjG2E",
-    same_site: "Lax"
+    same_site: "None",
+    secure: false # ! Em development, colocar true em produção
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
@@ -12,8 +13,8 @@ defmodule BackendWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
 
   socket "/socket", BackendWeb.UserSocket,
-    websocket: true,
-   longpoll: false
+    websocket: [connect_info: [:peer_data, {:session, @session_options}]],
+    longpoll: false
 
   plug CORSPlug, origin: ["http://localhost:3000"]
   plug Plug.Static,

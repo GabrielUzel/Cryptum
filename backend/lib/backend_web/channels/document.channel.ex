@@ -4,8 +4,10 @@ defmodule BackendWeb.DocumentChannel do
 
   @impl true
   def join("document:" <> filename, _payload, socket) do
-    {:ok, _pid} = Document.open(filename)
+    {:ok, pid} = Document.open(filename)
+    Document.channel_joined(filename)
     socket = assign(socket, :filename, filename)
+    socket = assign(socket, :document_pid, pid)
     send(self(), :after_join)
 
     {:ok, socket}
@@ -13,6 +15,14 @@ defmodule BackendWeb.DocumentChannel do
 
   def join("doc", _payload, _socket) do
     {:error, %{reason: "filename required"}}
+  end
+
+  @impl true
+  def terminate(_reason, socket) do
+    if socket.assigns[:filename] do
+      Document.channel_left(socket.assigns.filename)
+    end
+    :ok
   end
 
   @impl true

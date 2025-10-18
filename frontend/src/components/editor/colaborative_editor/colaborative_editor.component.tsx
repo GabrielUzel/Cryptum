@@ -15,11 +15,12 @@ interface ColaborativeEditorProps {
 export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) {
   const params = useParams();
   const projectId = params.project_id as string;
-
   const [isConnected, setIsConnected] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [content, setContent] = useState("");
-  const { connect, sendChange } = useDocumentChannel(projectId, setContent);
+  const [contentDelta, setContentDelta] = useState<Delta | null>(null);
+  
+  const { connect, sendChange } = useDocumentChannel(fileId, setContentDelta); 
+  
   const { quill, quillRef } = useQuill({
     theme: "snow",
     modules: {
@@ -37,7 +38,7 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
 
     const text = quill.getText();
     const lines = text.split('\n');
-    const numberOfLines = Math.max(1, lines.length);
+    const numberOfLines = Math.max(1, lines.length - 1);
     
     lineNumbersRef.current.innerHTML = "";
 
@@ -61,26 +62,33 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
   }, [connect]);
 
   useEffect(() => {
-    if (!quill) {
+    if (!quill || !contentDelta) {
       return;
     }
+    
+    const isInitialContent = contentDelta.length() > 0 && quill.getLength() <= 1;
 
-    quill.setText(content);
+    if (isInitialContent) {
+      quill.setContents(contentDelta, "silent");
+    } else if (contentDelta.ops && contentDelta.ops.length > 0) {
+      quill.updateContents(contentDelta, "api");
+    }
+    
     updateLineNumbers();
-  }, [quill, content, updateLineNumbers]);
+  }, [quill, contentDelta, updateLineNumbers]);
 
   useEffect(() => {
     if (!quill) {
       return;
     }
 
-    const handleTextChange = (delta: Delta, oldDelta: Delta, source: "user" | "api" | "silent") => {
+    const handleTextChange = (delta: Delta, _oldDelta: Delta, source: "user" | "api" | "silent") => {
       if (source !== "user") {
         return;
       }
       
       setDirty(true);
-      sendChange(quill.getContents().ops.map(op => op.insert).join(""));
+      sendChange(delta);
       updateLineNumbers();
     };
 
@@ -98,7 +106,7 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
       }
 
       try {
-        // await updateFile(projectId, fileId, quill.getText());
+        await updateFile(projectId, fileId, quill.getText()); 
         setDirty(false);
       } catch (err) {
         console.error("Failed to auto-save:", err);
@@ -127,6 +135,7 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
 
     const wrapper = editorWrapperRef.current;
     wrapper.addEventListener("scroll", handleScroll);
+
     return (
       () => wrapper.removeEventListener("scroll", handleScroll)
     );
@@ -160,32 +169,35 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
       overflow: visible !important;
     `;
 
-    const elements = editor.querySelectorAll('p, pre, code, div');
-    elements.forEach((el: Element) => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.style.cssText = `
+    const applyLineStyles = (el: HTMLElement) => {
+      el.style.cssText = `
         margin: 0 !important;
         padding: 0 !important;
         line-height: 20px !important;
         white-space: nowrap !important;
         color: black !important;
       `;
+    }
+
+    const initialElements = editor.querySelectorAll('p, pre, code, div');
+    initialElements.forEach((el: Element) => {
+      applyLineStyles(el as HTMLElement);
     });
 
-    const observer = new MutationObserver(() => {
-      const newElements = editor.querySelectorAll('p, pre, code, div');
-
-      newElements.forEach((el: Element) => {
-        const htmlEl = el as HTMLElement;
-      
-        if (!htmlEl.style.cssText.includes('white-space')) {
-          htmlEl.style.cssText = `
-            margin: 0 !important;
-            padding: 0 !important;
-            line-height: 20px !important;
-            white-space: nowrap !important;
-            color: black !important;
-          `;
+    const observer = new MutationObserver((mutationsList) => {
+      mutationsList.forEach(mutation => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) {
+              const htmlEl = node as HTMLElement;
+              if (!htmlEl.classList.contains('ql-editor')) {
+                applyLineStyles(htmlEl);
+              }
+              htmlEl.querySelectorAll('p, pre, code, div').forEach(child => {
+                applyLineStyles(child as HTMLElement);
+              });
+            }
+          });
         }
       });
     });

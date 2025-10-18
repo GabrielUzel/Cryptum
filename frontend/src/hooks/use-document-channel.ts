@@ -1,63 +1,84 @@
+// use-document-channel.ts
+
 import { useRef, useState, useCallback } from "react";
 import { Socket, Channel } from "phoenix";
 import { createSocket } from "@/utils/socket";
+import Delta from "quill-delta";
 
-type DeltaOp = {
-  insert?: string;
-  delete?: number;
-  retain?: number;
-  attributes?: Record<string, unknown>;
-};
+interface UpdatePayload {
+  change: Delta;
+  version: number;
+}
+
+interface OpenPayload {
+  content: Delta;
+  version: number;
+}
 
 export default function useDocumentChannel(
-  projectId: string,
-  setContent: (content: string) => void
+  fileId: string,
+  setContent: (content: Delta) => void
 ) {
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const versionRef = useRef<number>(0);
 
   const connect = useCallback(() => {
-    const token = localStorage.getItem("token");
-    const socket = createSocket(token);
+    const socket = createSocket();
     socketRef.current = socket;
 
-    const channel = socket.channel(`document:${projectId}`, {});
+    const channel = socket.channel(`document:${fileId}`, {});
     channelRef.current = channel;
 
     channel
       .join()
-      .receive("ok", () => {
-        console.log("Conectado ao canal do documento:", projectId);
+      .receive("ok", (resp) => {
         setIsConnected(true);
+        if (resp.version) {
+            versionRef.current = resp.version;
+        }
       })
       .receive("error", (resp) => {
         console.error("Erro ao conectar ao canal:", resp);
       });
 
-    channel.on("open", (payload: { content: string }) => {
-      setContent(payload.content);
+    channel.on("open", (payload: OpenPayload) => {
+      versionRef.current = payload.version;
+      setContent(new Delta(payload.content));
     });
 
-    channel.on("update", (payload: { change: { ops: DeltaOp[] } }) => {
-      const text = payload.change.ops.map((op: DeltaOp) => op.insert ?? "").join("");
-      setContent(text);
+    channel.on("update", (payload: UpdatePayload) => {
+      versionRef.current = payload.version;
+      setContent(new Delta(payload.change));
     });
 
+    // CORREÇÃO: Usa os refs para garantir o leave/disconnect da instância atual
     return () => {
-      channel.leave();
-      socket.disconnect();
+      if (channelRef.current) {
+        channelRef.current.leave();
+        channelRef.current = null;
+      }
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
       setIsConnected(false);
     };
-  }, [projectId, setContent]);
+  }, [fileId, setContent]);
 
-  const sendChange = (newContent: string) => {
+  const sendChange = (delta: Delta) => {
     if (channelRef.current && isConnected) {
-      const change = {
-        ops: [{ insert: newContent }],
-      };
-      
-      channelRef.current.push("update", { change, version: 0 });
+      channelRef.current.push("update", { 
+          change: delta, 
+          version: versionRef.current 
+        })
+        .receive("ok", (resp: { version: number }) => {
+            versionRef.current = resp.version;
+        })
+        .receive("error", (resp) => {
+            console.error("Erro ao enviar Delta:", resp);
+        });
     }
   };
 
