@@ -22,6 +22,7 @@ defmodule BackendWeb.DocumentChannel do
     if socket.assigns[:filename] do
       Document.channel_left(socket.assigns.filename)
     end
+
     :ok
   end
 

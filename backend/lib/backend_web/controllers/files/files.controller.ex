@@ -2,7 +2,11 @@ defmodule BackendWeb.FilesController do
   use BackendWeb, :controller
   alias Backend.Files.FilesService
 
-  def create(conn, %{"project_id" => project_id, "filename" => filename, "content_type" => content_type}) do
+  def create(conn, %{
+        "project_id" => project_id,
+        "filename" => filename,
+        "content_type" => content_type
+      }) do
     user_id = get_current_user_id(conn)
 
     case FilesService.create_file(user_id, project_id, filename, content_type) do
@@ -13,7 +17,13 @@ defmodule BackendWeb.FilesController do
         send_resp(conn, 400, Jason.encode!(Backend.TranslateMessages.as_error_array(changeset)))
 
       {:error, reason} ->
-        send_resp(conn, 400, Jason.encode!(Backend.TranslateMessages.as_single_error("Failed to create file: #{inspect(reason)}")))
+        send_resp(
+          conn,
+          400,
+          Jason.encode!(
+            Backend.TranslateMessages.as_single_error("Failed to create file: #{inspect(reason)}")
+          )
+        )
     end
   end
 
@@ -30,7 +40,15 @@ defmodule BackendWeb.FilesController do
         |> json(%{error: "User does not have sufficient role"})
 
       {:error, reason} ->
-        send_resp(conn, 400, Jason.encode!(Backend.TranslateMessages.as_single_error("Failed to upload files: #{inspect(reason)}")))
+        send_resp(
+          conn,
+          400,
+          Jason.encode!(
+            Backend.TranslateMessages.as_single_error(
+              "Failed to upload files: #{inspect(reason)}"
+            )
+          )
+        )
     end
   end
 
@@ -74,7 +92,11 @@ defmodule BackendWeb.FilesController do
     end
   end
 
-  def rename(conn, %{"project_id" => project_id, "file_id" => file_id, "new_filename" => new_filename}) do
+  def rename(conn, %{
+        "project_id" => project_id,
+        "file_id" => file_id,
+        "new_filename" => new_filename
+      }) do
     user_id = get_current_user_id(conn)
 
     case FilesService.rename_file(user_id, project_id, file_id, new_filename) do
@@ -98,6 +120,7 @@ defmodule BackendWeb.FilesController do
     case Guardian.Plug.current_resource(conn) do
       nil ->
         nil
+
       user ->
         user.id
     end

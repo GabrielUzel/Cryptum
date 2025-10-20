@@ -7,6 +7,7 @@ defmodule Backend.Document do
 
   @save_interval 5_000
   @cleanup_delay 5_000
+  @latex_dir Path.expand("temp/latex")
 
   def start_link(filename) do
     GenServer.start_link(__MODULE__, filename, name: name(filename))
@@ -40,10 +41,7 @@ defmodule Backend.Document do
 
   @impl true
   def init(filename) do
-    dir_path = Path.expand("temp/latex")
-    File.mkdir_p!(dir_path)
-
-    path = Path.join(dir_path, filename)
+    path = Path.join(@latex_dir, filename)
 
     content =
       case File.read(path) do
@@ -53,8 +51,11 @@ defmodule Backend.Document do
         {:error, :enoent} ->
           case FilesService.get_document_content(filename) do
             {:ok, blob_data} ->
-              File.write!(path, blob_data)
-              String.trim_trailing(blob_data)
+              case File.write(path, blob_data, [:binary]) do
+                :ok -> String.trim_trailing(blob_data)
+                {:error, _} -> ""
+              end
+
             {:error, _} ->
               ""
           end
@@ -62,7 +63,6 @@ defmodule Backend.Document do
         {:error, _} ->
           ""
       end
-      |> Kernel.<>("\n")
 
     quill_delta = %{"ops" => [%{"insert" => content}]}
     text_delta = DeltaConverter.quill_to_text_delta(quill_delta)
@@ -171,7 +171,8 @@ defmodule Backend.Document do
     new_state =
       if state.dirty do
         content_to_save = extract_text(state.content.ops)
-        path = Path.expand("temp/latex/#{state.filename}")
+
+        path = Path.join(@latex_dir, state.filename)
 
         File.write!(path, content_to_save)
 
@@ -186,28 +187,29 @@ defmodule Backend.Document do
 
   @impl true
   def terminate(_reason, state) do
+    path = Path.join(@latex_dir, state.filename)
+
     if state.dirty do
       content_to_save = extract_text(state.content.ops)
-      path = Path.expand("temp/latex/#{state.filename}")
-      File.write!(path, content_to_save)
+      File.write!(path, content_to_save, [:binary])
     end
 
-    path = Path.expand("temp/latex/#{state.filename}")
-    IO.puts("Deleting temporary file: #{path}")
     File.rm(path)
+
     :ok
   end
 
   defp name(filename), do: {:via, Registry, {Backend.Registry, filename}}
 
   defp extract_text(ops) when is_list(ops) do
-    text = ops
-    |> Enum.map(fn
-      %{insert: content} when is_binary(content) -> content
-      _ -> ""
-    end)
-    |> Enum.join()
+    text =
+      ops
+      |> Enum.map(fn
+        %{insert: content} when is_binary(content) -> content
+        _ -> ""
+      end)
+      |> Enum.join()
 
-    String.trim_trailing(text) <> "\n"
+    String.trim_trailing(text)
   end
 end

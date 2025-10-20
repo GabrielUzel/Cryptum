@@ -12,19 +12,21 @@ interface ColaborativeEditorProps {
   fileId: string;
 }
 
-export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) {
+export default function ColaborativeEditor(props: ColaborativeEditorProps) {
+  const { fileId } = props;
   const params = useParams();
   const projectId = params.project_id as string;
   const [isConnected, setIsConnected] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [contentDelta, setContentDelta] = useState<Delta | null>(null);
-  
-  const { connect, sendChange } = useDocumentChannel(fileId, setContentDelta); 
-  
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
+
+  const { connect, sendChange } = useDocumentChannel(fileId, setContentDelta);
+
   const { quill, quillRef } = useQuill({
     theme: "snow",
     modules: {
-      toolbar: false
+      toolbar: false,
     },
   });
 
@@ -37,20 +39,27 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
     }
 
     const text = quill.getText();
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const numberOfLines = Math.max(1, lines.length - 1);
-    
+
     lineNumbersRef.current.innerHTML = "";
 
     for (let i = 1; i <= numberOfLines; i++) {
       const div = document.createElement("div");
       div.textContent = i.toString();
       div.style.height = `20px`;
-      div.style.lineHeight = `20px`;
-      div.className = "text-white select-none text-right px-2";
+      div.style.lineHeight = `28px`;
+      div.className = "text-white select-none text-right px-4";
       lineNumbersRef.current.appendChild(div);
     }
   }, [quill]);
+
+  useEffect(() => {
+    if (quill) {
+      quill.setContents(new Delta(), "silent");
+      setIsContentLoaded(false);
+    }
+  }, [fileId, quill]);
 
   useEffect(() => {
     const disconnect = connect();
@@ -65,28 +74,35 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
     if (!quill || !contentDelta) {
       return;
     }
-    
-    const isInitialContent = contentDelta.length() > 0 && quill.getLength() <= 1;
 
-    if (isInitialContent) {
+    if (!isContentLoaded && contentDelta.length() > 0) {
       quill.setContents(contentDelta, "silent");
-    } else if (contentDelta.ops && contentDelta.ops.length > 0) {
+      setIsContentLoaded(true);
+    } else if (
+      isContentLoaded &&
+      contentDelta.ops &&
+      contentDelta.ops.length > 0
+    ) {
       quill.updateContents(contentDelta, "api");
     }
-    
+
     updateLineNumbers();
-  }, [quill, contentDelta, updateLineNumbers]);
+  }, [quill, contentDelta, updateLineNumbers, isContentLoaded]);
 
   useEffect(() => {
     if (!quill) {
       return;
     }
 
-    const handleTextChange = (delta: Delta, _oldDelta: Delta, source: "user" | "api" | "silent") => {
+    const handleTextChange = (
+      delta: Delta,
+      _oldDelta: Delta,
+      source: "user" | "api" | "silent",
+    ) => {
       if (source !== "user") {
         return;
       }
-      
+
       setDirty(true);
       sendChange(delta);
       updateLineNumbers();
@@ -101,12 +117,12 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      if (!dirty || !quill) {
+      if (!dirty || !quill || !isContentLoaded) {
         return;
       }
 
       try {
-        await updateFile(projectId, fileId, quill.getText()); 
+        await updateFile(projectId, fileId, quill.getText());
         setDirty(false);
       } catch (err) {
         console.error("Failed to auto-save:", err);
@@ -114,7 +130,7 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [dirty, quill, projectId, fileId]);
+  }, [dirty, quill, projectId, fileId, isContentLoaded]);
 
   useEffect(() => {
     if (!quill) {
@@ -136,19 +152,17 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
     const wrapper = editorWrapperRef.current;
     wrapper.addEventListener("scroll", handleScroll);
 
-    return (
-      () => wrapper.removeEventListener("scroll", handleScroll)
-    );
+    return () => wrapper.removeEventListener("scroll", handleScroll);
   }, []);
 
- useEffect(() => {
+  useEffect(() => {
     if (!quill) {
       return;
     }
 
     const container = quill.container;
     const editor = quill.root;
-    
+
     container.style.cssText = `
       height: auto !important;
       min-height: 100% !important;
@@ -156,13 +170,13 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
       font-family: monospace !important;
       overflow: visible !important;
     `;
-    
+
     editor.style.cssText = `
       white-space: nowrap !important;
       overflow-wrap: normal !important;
       min-height: 100% !important;
       height: auto !important;
-      padding: 12px 15px !important;
+      padding: 8px 0px !important;
       line-height: 20px !important;
       font-family: monospace !important;
       color: black !important;
@@ -172,28 +186,28 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
     const applyLineStyles = (el: HTMLElement) => {
       el.style.cssText = `
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 0 0 0 4px !important;
         line-height: 20px !important;
         white-space: nowrap !important;
         color: black !important;
       `;
-    }
+    };
 
-    const initialElements = editor.querySelectorAll('p, pre, code, div');
+    const initialElements = editor.querySelectorAll("p, pre, code, div");
     initialElements.forEach((el: Element) => {
       applyLineStyles(el as HTMLElement);
     });
 
     const observer = new MutationObserver((mutationsList) => {
-      mutationsList.forEach(mutation => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(node => {
+      mutationsList.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach((node) => {
             if (node.nodeType === 1) {
               const htmlEl = node as HTMLElement;
-              if (!htmlEl.classList.contains('ql-editor')) {
+              if (!htmlEl.classList.contains("ql-editor")) {
                 applyLineStyles(htmlEl);
               }
-              htmlEl.querySelectorAll('p, pre, code, div').forEach(child => {
+              htmlEl.querySelectorAll("p, pre, code, div").forEach((child) => {
                 applyLineStyles(child as HTMLElement);
               });
             }
@@ -201,6 +215,31 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
         }
       });
     });
+
+    const highlightCurrentLine = () => {
+      const range = quill.getSelection();
+
+      if (!range) {
+        return;
+      }
+
+      const allLines = editor.querySelectorAll("p, pre, code, div");
+      allLines.forEach((el) => {
+        (el as HTMLElement).style.backgroundColor = "transparent";
+      });
+
+      const [line] = quill.getLine(range.index);
+
+      if (!line) {
+        return;
+      }
+
+      const lineDom = line.domNode as HTMLElement;
+      lineDom.style.backgroundColor = "#a9b3bc";
+    };
+
+    quill.on("selection-change", highlightCurrentLine);
+    quill.on("text-change", highlightCurrentLine);
 
     observer.observe(editor, { childList: true, subtree: true });
     updateLineNumbers();
@@ -214,8 +253,14 @@ export default function ColaborativeEditor({ fileId }: ColaborativeEditorProps) 
         <p className="text-sm text-gray-400 mt-2">Conectando ao servidor...</p>
       )}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        <div ref={lineNumbersRef} className="bg-primary text-right select-none p-2 flex flex-col overflow-y-hidden" />
-        <div ref={editorWrapperRef} className="flex-1 min-w-0 bg-white overflow-auto text-black">
+        <div
+          ref={lineNumbersRef}
+          className="bg-primary text-right select-none pt-1 flex flex-col justify-start overflow-y-hidden"
+        />
+        <div
+          ref={editorWrapperRef}
+          className="flex-1 min-w-0 bg-white overflow-auto text-black"
+        >
           <div ref={quillRef} />
         </div>
       </div>

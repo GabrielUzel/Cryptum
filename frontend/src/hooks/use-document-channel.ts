@@ -1,5 +1,3 @@
-// use-document-channel.ts
-
 import { useRef, useState, useCallback } from "react";
 import { Socket, Channel } from "phoenix";
 import { createSocket } from "@/utils/socket";
@@ -17,7 +15,7 @@ interface OpenPayload {
 
 export default function useDocumentChannel(
   fileId: string,
-  setContent: (content: Delta) => void
+  setContent: (content: Delta) => void,
 ) {
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
@@ -36,7 +34,7 @@ export default function useDocumentChannel(
       .receive("ok", (resp) => {
         setIsConnected(true);
         if (resp.version) {
-            versionRef.current = resp.version;
+          versionRef.current = resp.version;
         }
       })
       .receive("error", (resp) => {
@@ -53,7 +51,6 @@ export default function useDocumentChannel(
       setContent(new Delta(payload.change));
     });
 
-    // CORREÇÃO: Usa os refs para garantir o leave/disconnect da instância atual
     return () => {
       if (channelRef.current) {
         channelRef.current.leave();
@@ -63,21 +60,23 @@ export default function useDocumentChannel(
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+
       setIsConnected(false);
     };
   }, [fileId, setContent]);
 
   const sendChange = (delta: Delta) => {
     if (channelRef.current && isConnected) {
-      channelRef.current.push("update", { 
-          change: delta, 
-          version: versionRef.current 
+      channelRef.current
+        .push("update", {
+          change: delta,
+          version: versionRef.current,
         })
         .receive("ok", (resp: { version: number }) => {
-            versionRef.current = resp.version;
+          versionRef.current = resp.version;
         })
         .receive("error", (resp) => {
-            console.error("Erro ao enviar Delta:", resp);
+          console.error("Erro ao enviar Delta:", resp);
         });
     }
   };
