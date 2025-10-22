@@ -34,6 +34,7 @@ defmodule Backend.AccountsRepository do
       nil ->
         Argon2.no_user_verify()
         {:error, "Email invalid"}
+
       user ->
         if Argon2.verify_pass(password, user.hashed_password) do
           {:ok, user}

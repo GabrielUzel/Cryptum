@@ -7,12 +7,16 @@ defmodule BackendWeb.Router do
 
   pipeline :auth do
     plug :fetch_session
+
     plug Guardian.Plug.Pipeline,
       otp_app: :backend,
       module: Backend.GuardianAuth,
       error_handler: Backend.GuardianErrorHandler
 
-    plug BackendWeb.Plugs.CookieToSession, cookie_key: "cryptum_token", session_key: "guardian_default_token"
+    plug BackendWeb.Plugs.CookieToSession,
+      cookie_key: "cryptum_token",
+      session_key: "guardian_default_token"
+
     plug Guardian.Plug.VerifySession, key: "guardian_default"
     plug Guardian.Plug.LoadResource
     plug Guardian.Plug.EnsureAuthenticated
@@ -65,7 +69,6 @@ defmodule BackendWeb.Router do
     post "/upload", FilesController, :upload
     get "/:project_id", FilesController, :list_files
     get "/:project_id/file/:file_id", FilesController, :download
-    put "/:project_id/file/:file_id", FilesController, :update
     put "/:project_id/file/:file_id/rename", FilesController, :rename
     delete "/:project_id/file/:file_id", FilesController, :delete
   end

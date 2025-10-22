@@ -9,14 +9,23 @@ defmodule BackendWeb.LoginController do
       {:ok, user} ->
         if user.email_confirmed do
           {:ok, token, _claims} = Backend.GuardianAuth.encode_and_sign(user, %{})
+
           conn
-          |> Plug.Conn.put_resp_cookie("cryptum_token", token, http_only: true, secure: false, path: "/", same_site: "Lax", max_age: 60 * 60 * 24 * 7) # ! Está secure: false apenas em dev
+          |> Plug.Conn.put_resp_cookie("cryptum_token", token,
+            http_only: true,
+            # Está secure: false apenas em dev
+            secure: false,
+            path: "/",
+            same_site: "Lax",
+            max_age: 60 * 60 * 24 * 7
+          )
           |> json(TranslateMessages.as_single_success("Login successful"))
         else
           conn
           |> Plug.Conn.put_status(:unauthorized)
           |> json(TranslateMessages.as_single_error("Email not confirmed"))
         end
+
       {:error, reason} ->
         conn
         |> Plug.Conn.put_status(:unauthorized)
@@ -38,6 +47,7 @@ defmodule BackendWeb.LoginController do
         conn
         |> Plug.Conn.put_status(:unauthorized)
         |> json(%{error: "Not authenticated"})
+
       user ->
         json(conn, %{id: user.id, name: user.name})
     end
@@ -52,6 +62,7 @@ defmodule BackendWeb.LoginController do
 
       user ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "reset_password", user.id)
+        # Mudar url em produção
         reset_url = "http://localhost:3000/auth/reset-password/confirmation?token=#{token}"
 
         case MailerHandler.reset_password(email, reset_url) do
@@ -59,6 +70,7 @@ defmodule BackendWeb.LoginController do
             conn
             |> put_status(:ok)
             |> json(TranslateMessages.as_single_success("Email sent"))
+
           {:error, _} ->
             conn
             |> put_status(:internal_server_error)
@@ -68,16 +80,16 @@ defmodule BackendWeb.LoginController do
   end
 
   def reset_password(conn, %{"token" => token, "password" => password}) do
-    with {:ok, user_id} <- Phoenix.Token.verify(BackendWeb.Endpoint, "reset_password", token, max_age: 3600),
-      user when not is_nil(user) <- AccountsRepository.get_user_by_id(user_id),
-      _changeset <- Ecto.Changeset.change(user, %{}),
-      {:ok, hashed} <- {:ok, Argon2.hash_pwd_salt(password)},
-      {:ok, _updated_user} <- Backend.Repo.update(Ecto.Changeset.change(user, hashed_password: hashed)) do
-
+    with {:ok, user_id} <-
+           Phoenix.Token.verify(BackendWeb.Endpoint, "reset_password", token, max_age: 3600),
+         user when not is_nil(user) <- AccountsRepository.get_user_by_id(user_id),
+         _changeset <- Ecto.Changeset.change(user, %{}),
+         {:ok, hashed} <- {:ok, Argon2.hash_pwd_salt(password)},
+         {:ok, _updated_user} <-
+           Backend.Repo.update(Ecto.Changeset.change(user, hashed_password: hashed)) do
       conn
-        |> put_status(:ok)
-        |> json(%{message: "Password updated successfully"})
-
+      |> put_status(:ok)
+      |> json(%{message: "Password updated successfully"})
     else
       {:error, :invalid} ->
         conn

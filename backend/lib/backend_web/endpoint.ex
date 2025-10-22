@@ -1,11 +1,13 @@
 defmodule BackendWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :backend
+
   @session_options [
     store: :cookie,
     key: "_backend_key",
     signing_salt: "/3xzjG2E",
     same_site: "None",
-    secure: false # ! Em development, colocar true em produção
+    # ! Em development, colocar true em produção
+    secure: false
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
@@ -17,6 +19,7 @@ defmodule BackendWeb.Endpoint do
     longpoll: false
 
   plug CORSPlug, origin: ["http://localhost:3000"]
+
   plug Plug.Static,
     at: "/",
     from: :backend,

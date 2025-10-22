@@ -6,10 +6,13 @@ defmodule BackendWeb.DocumentChannel do
   def join("document:" <> filename, _payload, socket) do
     {:ok, pid} = Document.open(filename)
     Document.channel_joined(filename)
-    socket = assign(socket, :filename, filename)
-    socket = assign(socket, :document_pid, pid)
-    send(self(), :after_join)
 
+    socket =
+      socket
+      |> assign(:filename, filename)
+      |> assign(:document_pid, pid)
+
+    send(self(), :after_join)
     {:ok, socket}
   end
 
@@ -19,8 +22,8 @@ defmodule BackendWeb.DocumentChannel do
 
   @impl true
   def terminate(_reason, socket) do
-    if socket.assigns[:filename] do
-      Document.channel_left(socket.assigns.filename)
+    if filename = socket.assigns[:filename] do
+      Document.channel_left(filename)
     end
 
     :ok
@@ -30,7 +33,6 @@ defmodule BackendWeb.DocumentChannel do
   def handle_info(:after_join, socket) do
     response = Document.get_contents(socket.assigns.filename)
     push(socket, "open", response)
-
     {:noreply, socket}
   end
 

@@ -80,8 +80,8 @@ if config_env() in [:dev, :test] do
     ssl: false,
     tls: :always,
     auth: :always,
-      tls_options: [
-     verify: :verify_none,
+    tls_options: [
+      verify: :verify_none,
       versions: [:"tlsv1.2"]
     ]
 

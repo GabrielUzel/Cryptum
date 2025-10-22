@@ -34,7 +34,9 @@ defmodule Backend.FilesRepository do
 
   def update_file(file_id, attrs) do
     case Repo.get(File, file_id) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       file ->
         file
         |> File.changeset(attrs)

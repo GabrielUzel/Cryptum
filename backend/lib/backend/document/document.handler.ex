@@ -1,13 +1,13 @@
 defmodule Backend.Document do
   use GenServer
+  require Logger
+
   alias Backend.Document.Supervisor
   alias TextDelta
   alias Backend.DeltaConverter
   alias Backend.Files.FilesService
 
   @save_interval 5_000
-  @cleanup_delay 5_000
-  @latex_dir Path.expand("temp/latex")
 
   def start_link(filename) do
     GenServer.start_link(__MODULE__, filename, name: name(filename))
@@ -16,6 +16,7 @@ defmodule Backend.Document do
   def open(filename) do
     case GenServer.whereis(name(filename)) do
       nil ->
+        Logger.info("Starting new Document process for: #{filename}")
         DynamicSupervisor.start_child(Supervisor, {__MODULE__, filename})
 
       pid ->
@@ -23,48 +24,21 @@ defmodule Backend.Document do
     end
   end
 
-  def channel_joined(filename) do
-    GenServer.call(name(filename), :channel_joined)
-  end
+  def channel_joined(filename), do: GenServer.cast(name(filename), :channel_joined)
+  def channel_left(filename), do: GenServer.cast(name(filename), :channel_left)
+  def get_contents(filename), do: GenServer.call(name(filename), :get_contents)
 
-  def channel_left(filename) do
-    GenServer.call(name(filename), :channel_left)
-  end
-
-  def get_contents(filename) do
-    GenServer.call(name(filename), :get_contents)
-  end
-
-  def update(filename, change, version) do
-    GenServer.call(name(filename), {:update, change, version})
-  end
+  def update(filename, change, version),
+    do: GenServer.call(name(filename), {:update, change, version})
 
   @impl true
   def init(filename) do
-    path = Path.join(@latex_dir, filename)
+    dir_path = Path.expand("temp/latex")
+    File.mkdir_p!(dir_path)
+    local_path = Path.join(dir_path, filename)
 
-    content =
-      case File.read(path) do
-        {:ok, data} ->
-          String.trim_trailing(data)
-
-        {:error, :enoent} ->
-          case FilesService.get_document_content(filename) do
-            {:ok, blob_data} ->
-              case File.write(path, blob_data, [:binary]) do
-                :ok -> String.trim_trailing(blob_data)
-                {:error, _} -> ""
-              end
-
-            {:error, _} ->
-              ""
-          end
-
-        {:error, _} ->
-          ""
-      end
-
-    quill_delta = %{"ops" => [%{"insert" => content}]}
+    content = load_content_from_azure(filename)
+    quill_delta = %{"ops" => [%{"insert" => content || ""}]}
     text_delta = DeltaConverter.quill_to_text_delta(quill_delta)
 
     state = %{
@@ -74,42 +48,98 @@ defmodule Backend.Document do
       changes: [],
       dirty: false,
       channel_count: 0,
-      cleanup_timer: nil
+      local_path: local_path,
+      autosave_timer: nil,
+      file_created: false
     }
-
-    Process.send_after(self(), :autosave, @save_interval)
 
     {:ok, state}
   end
 
-  @impl true
-  def handle_call(:channel_joined, _from, state) do
-    if state.cleanup_timer do
-      Process.cancel_timer(state.cleanup_timer)
+  defp load_content_from_azure(filename) do
+    case FilesService.get_document_content(filename) do
+      {:ok, blob} when is_binary(blob) and blob != "" ->
+        blob
+
+      {:ok, _blob} ->
+        ""
+
+      {:error, :not_found} ->
+        ""
+
+      {:error, reason} ->
+        Logger.error("Error loading from Azure for #{filename}: #{inspect(reason)}")
+        ""
+
+      _ ->
+        ""
     end
-
-    new_state = %{
-      state
-      | channel_count: state.channel_count + 1,
-        cleanup_timer: nil
-    }
-
-    {:reply, :ok, new_state}
   end
 
   @impl true
-  def handle_call(:channel_left, _from, state) do
-    new_count = max(0, state.channel_count - 1)
-
+  def handle_cast(:channel_joined, state) do
     new_state =
-      if new_count == 0 do
-        timer = Process.send_after(self(), :cleanup, @cleanup_delay)
-        %{state | channel_count: new_count, cleanup_timer: timer}
+      if state.channel_count == 0 do
+        content_to_write = extract_text_with_newlines(state.content.ops)
+
+        case File.write(state.local_path, content_to_write) do
+          :ok ->
+            timer = Process.send_after(self(), :autosave, @save_interval)
+            %{state | autosave_timer: timer, file_created: true}
+
+          {:error, reason} ->
+            Logger.error("Failed to create temp file for #{state.filename}: #{inspect(reason)}")
+            state
+        end
       else
-        %{state | channel_count: new_count}
+        state
       end
 
-    {:reply, :ok, new_state}
+    {:noreply, %{new_state | channel_count: state.channel_count + 1}}
+  end
+
+  @impl true
+  def handle_cast(:channel_left, state) do
+    new_count = max(0, state.channel_count - 1)
+
+    if new_count == 0 do
+      cleanup_resources(state)
+      {:stop, :normal, %{state | channel_count: 0}}
+    else
+      {:noreply, %{state | channel_count: new_count}}
+    end
+  end
+
+  defp cleanup_resources(state) do
+    if state.autosave_timer do
+      Process.cancel_timer(state.autosave_timer)
+    end
+
+    if state.dirty do
+      content_to_save = extract_text_with_newlines(state.content.ops)
+
+      case FilesService.update_file(state.filename, content_to_save) do
+        {:ok, _} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Failed to save #{state.filename} to Azure: #{inspect(reason)}")
+      end
+    end
+
+    # Remove temp file
+    if state.file_created do
+      case File.rm(state.local_path) do
+        :ok ->
+          :ok
+
+        {:error, :enoent} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Failed to remove temp file #{state.local_path}: #{inspect(reason)}")
+      end
+    end
   end
 
   @impl true
@@ -127,34 +157,28 @@ defmodule Backend.Document do
     edits_since = state.version - client_version
 
     case edits_since do
-      edits_since when edits_since < 0 ->
+      x when x < 0 ->
         {:reply, {:error, :version_too_high}, state}
 
-      edits_since when edits_since > 100 ->
+      x when x > 100 ->
         {:reply, {:error, :version_too_old}, state}
 
-      edits_since ->
+      _ ->
         client_change_converted = DeltaConverter.quill_to_text_delta(client_change)
 
-        transformed_change =
-          state.changes
-          |> Enum.take(edits_since)
-          |> Enum.reverse()
-          |> Enum.reduce(client_change_converted, &TextDelta.transform(&1, &2, :right))
-
-        new_content = TextDelta.compose(state.content, transformed_change)
+        new_content = TextDelta.compose(state.content, client_change_converted)
 
         new_state = %{
           state
           | version: state.version + 1,
-            changes: [transformed_change | state.changes],
+            changes: [client_change_converted | state.changes],
             content: new_content,
             dirty: true
         }
 
         response = %{
           version: new_state.version,
-          change: DeltaConverter.text_delta_to_quill(transformed_change)
+          change: DeltaConverter.text_delta_to_quill(client_change_converted)
         }
 
         {:reply, {:ok, response}, new_state}
@@ -162,54 +186,57 @@ defmodule Backend.Document do
   end
 
   @impl true
-  def handle_info(:cleanup, state) do
-    {:stop, :normal, state}
-  end
-
-  @impl true
   def handle_info(:autosave, state) do
     new_state =
       if state.dirty do
-        content_to_save = extract_text(state.content.ops)
+        content_to_save = extract_text_with_newlines(state.content.ops)
 
-        path = Path.join(@latex_dir, state.filename)
+        if state.file_created do
+          case File.write(state.local_path, content_to_save) do
+            :ok ->
+              :ok
 
-        File.write!(path, content_to_save)
+            {:error, reason} ->
+              Logger.error("Failed to update temp file #{state.local_path}: #{inspect(reason)}")
+          end
+        end
+
+        case FilesService.update_file(state.filename, content_to_save) do
+          {:ok, _} ->
+            :ok
+
+          {:error, reason} ->
+            Logger.error("Autosave failed for #{state.filename}: #{inspect(reason)}")
+        end
 
         %{state | dirty: false}
       else
         state
       end
 
-    Process.send_after(self(), :autosave, @save_interval)
-    {:noreply, new_state}
+    if state.channel_count > 0 do
+      timer = Process.send_after(self(), :autosave, @save_interval)
+      {:noreply, %{new_state | autosave_timer: timer}}
+    else
+      {:noreply, %{new_state | autosave_timer: nil}}
+    end
   end
 
   @impl true
   def terminate(_reason, state) do
-    path = Path.join(@latex_dir, state.filename)
-
-    if state.dirty do
-      content_to_save = extract_text(state.content.ops)
-      File.write!(path, content_to_save, [:binary])
-    end
-
-    File.rm(path)
-
+    cleanup_resources(state)
     :ok
   end
 
   defp name(filename), do: {:via, Registry, {Backend.Registry, filename}}
 
-  defp extract_text(ops) when is_list(ops) do
-    text =
-      ops
-      |> Enum.map(fn
-        %{insert: content} when is_binary(content) -> content
-        _ -> ""
-      end)
-      |> Enum.join()
-
-    String.trim_trailing(text)
+  defp extract_text_with_newlines(ops) when is_list(ops) do
+    ops
+    |> Enum.map(fn
+      %{insert: content} when is_binary(content) -> content
+      %{insert: "\n"} -> "\n"
+      _ -> ""
+    end)
+    |> Enum.join()
   end
 end

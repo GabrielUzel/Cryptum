@@ -10,7 +10,7 @@ defmodule Backend.Application do
       {Finch, name: Swoosh.Finch},
       BackendWeb.Endpoint,
       {Registry, keys: :unique, name: Backend.Registry},
-      {DynamicSupervisor, strategy: :one_for_one, name: Backend.Document.Supervisor}
+      Backend.Document.Supervisor
     ]
 
     opts = [strategy: :one_for_one, name: Backend.Supervisor]

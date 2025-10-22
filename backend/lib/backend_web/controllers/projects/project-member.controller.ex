@@ -44,10 +44,17 @@ defmodule BackendWeb.ProjectMemberController do
     end
   end
 
-  def manage_members(conn, %{"project_id" => project_id, "updates" => updates, "deletes" => deletes}) do
+  def manage_members(conn, %{
+        "project_id" => project_id,
+        "updates" => updates,
+        "deletes" => deletes
+      }) do
     current_user_id = get_current_user_id(conn)
 
-    case ProjectsService.manage_members(current_user_id, project_id, %{"updates" => updates, "deletes" => deletes}) do
+    case ProjectsService.manage_members(current_user_id, project_id, %{
+           "updates" => updates,
+           "deletes" => deletes
+         }) do
       {:ok, _} -> json(conn, %{message: "Members updated successfully"})
       {:error, :not_authorized} -> send_resp(conn, 403, "Not authorized")
       {:error, :cannot_remove_admin} -> send_resp(conn, 400, "Cannot remove admin")
@@ -59,6 +66,7 @@ defmodule BackendWeb.ProjectMemberController do
     case Guardian.Plug.current_resource(conn) do
       nil ->
         nil
+
       user ->
         user.id
     end

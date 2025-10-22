@@ -8,6 +8,7 @@ defmodule BackendWeb.ProjectController do
     case ProjectsService.create_project(user_id, name, description) do
       {:ok, _result} ->
         json(conn, %{message: "Project created"})
+
       {:error, reason} ->
         send_resp(conn, 400, inspect(reason))
     end
@@ -65,6 +66,7 @@ defmodule BackendWeb.ProjectController do
     case Guardian.Plug.current_resource(conn) do
       nil ->
         nil
+
       user ->
         user.id
     end

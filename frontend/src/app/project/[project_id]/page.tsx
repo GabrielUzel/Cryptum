@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { getProjectInfo } from "@/hooks/use-projects";
 import { useParams } from "next/navigation";
@@ -19,6 +19,7 @@ export default function ProjectPage() {
   const project_id = params.project_id as string;
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
   const [data, setData] = useState<Project | null>(null);
+  const [isFileEditable, setIsFileEditable] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,18 +30,42 @@ export default function ProjectPage() {
     fetchData();
   }, [project_id]);
 
+  const handleFileDeleted = (deletedFileId: string) => {
+    if (currentFileId === deletedFileId) {
+      setCurrentFileId(null);
+      setIsFileEditable(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 text-white h-screen">
       <ProjectMenubar title={data?.name} />
       <div className="flex flex-1 gap-4 mx-4 mb-4 overflow-hidden">
-        <FilesManager projectId={project_id} onSelectFile={setCurrentFileId} />
+        <FilesManager
+          projectId={project_id}
+          onSelectFile={setCurrentFileId}
+          currentFileId={currentFileId}
+          setFileIsEditable={setIsFileEditable}
+          onFileDeleted={handleFileDeleted}
+        />
         <ClientOnly>
-          {currentFileId ? 
-            <ColaborativeEditor fileId={currentFileId} /> : 
+          {currentFileId ? (
+            isFileEditable ? (
+              <ColaborativeEditor fileId={currentFileId} />
+            ) : (
+              <div className="flex-[2] bg-card p-4 rounded-lg">
+                <p className="text-center text-muted-foreground mt-20">
+                  Este arquivo não é editável
+                </p>
+              </div>
+            )
+          ) : (
             <div className="flex-[2] bg-card p-4 rounded-lg">
-              <p className="text-center text-muted-foreground mt-20">Selecione um arquivo para editar</p>
+              <p className="text-center text-muted-foreground mt-20">
+                Selecione um arquivo para editar
+              </p>
             </div>
-          }
+          )}
         </ClientOnly>
         <Compiler />
       </div>

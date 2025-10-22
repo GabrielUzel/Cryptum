@@ -8,6 +8,7 @@ import { downloadFile } from "@/hooks/use-files";
 import RenameFileDialog from "./rename-file-dialog.component";
 import DeleteFileDialog from "./delete-file-dialog.component";
 import { renameFile, deleteFile } from "@/hooks/use-files";
+import { on } from "node:stream";
 
 type FileCardProps = {
   projectId: string;
@@ -15,12 +16,20 @@ type FileCardProps = {
   fileName: string;
   fileExtension: string;
   onClick?: () => void;
-}
+  isSelected: boolean;
+  onFileDeleted: (deletedFileId: string) => void;
+};
 
-export default function FileCard(
-  props: FileCardProps
-) {
-  const { projectId, fileId, fileName, fileExtension, onClick } = props;
+export default function FileCard(props: FileCardProps) {
+  const {
+    projectId,
+    fileId,
+    fileName,
+    fileExtension,
+    onClick,
+    isSelected,
+    onFileDeleted,
+  } = props;
   const [openRename, setOpenRename] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -35,15 +44,15 @@ export default function FileCard(
       default:
         return "/default-file-icon.svg";
     }
-  }
+  };
 
   const openRenameDialog = () => {
     setOpenRename(true);
-  }
+  };
 
   const openDeleteDialog = () => {
     setOpenDelete(true);
-  }
+  };
 
   const onDownload = async () => {
     try {
@@ -53,40 +62,44 @@ export default function FileCard(
 
       link.href = url;
       link.setAttribute("download", fileName);
-      
+
       document.body.appendChild(link);
 
       link.click();
       link.parentNode?.removeChild(link);
     } catch {
-      toast.error("Houve um erro ao baixar o arquivo")
+      toast.error("Houve um erro ao baixar o arquivo");
     }
-  }
+  };
 
   const onRename = async (fileName: string) => {
     try {
       await renameFile(projectId, fileId, fileName);
       toast.success("Arquivo renomeado com sucesso!");
       setOpenRename(false);
-      queryClient.invalidateQueries({ queryKey: ['getFiles'] });
+      queryClient.invalidateQueries({ queryKey: ["getFiles"] });
     } catch {
       toast.error("Houve um erro ao renomear o arquivo");
     }
-  }
+  };
 
   const onDelete = async () => {
     try {
       await deleteFile(projectId, fileId);
-      queryClient.invalidateQueries({ queryKey: ['getFiles'] });
+      queryClient.invalidateQueries({ queryKey: ["getFiles"] });
+      onFileDeleted(fileId);
       toast.success("Arquivo excluído com sucesso!");
     } catch {
       toast.error("Houve algum erro, tente novamente mais tarde.");
     }
-  }
+  };
 
-  return(
+  return (
     <>
-      <Card className="flex flex-row items-center justify-between p-3 border-none shadow-none bg-card hover:brightness-150 cursor-pointer rounded-none" onClick={onClick}>
+      <Card
+        className={`flex flex-row items-center justify-between p-3 border-none shadow-none hover:brightness-150 cursor-pointer rounded-none ${isSelected ? "bg-secondary" : "bg-card"}`}
+        onClick={onClick}
+      >
         <div className="flex gap-3">
           <div className="w-5 h-5 relative">
             <Image
@@ -99,11 +112,24 @@ export default function FileCard(
           <p className="text-white">{fileName}</p>
         </div>
         <div>
-          <FilePopover downloadAction={onDownload} renameAction={openRenameDialog} deleteAction={openDeleteDialog}/>
+          <FilePopover
+            downloadAction={onDownload}
+            renameAction={openRenameDialog}
+            deleteAction={openDeleteDialog}
+          />
         </div>
       </Card>
-      <RenameFileDialog open={openRename} setOpen={setOpenRename} onRename={onRename} initialFileName={fileName}/>
-      <DeleteFileDialog open={openDelete} setOpen={setOpenDelete} onDelete={onDelete} />
+      <RenameFileDialog
+        open={openRename}
+        setOpen={setOpenRename}
+        onRename={onRename}
+        initialFileName={fileName}
+      />
+      <DeleteFileDialog
+        open={openDelete}
+        setOpen={setOpenDelete}
+        onDelete={onDelete}
+      />
     </>
   );
 }

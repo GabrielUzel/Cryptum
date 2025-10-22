@@ -19,6 +19,9 @@ defmodule Backend.Projects.Project do
     |> validate_required(:name, message: "Name cannot be empty")
     |> validate_required(:description, message: "Description cannot be empty")
     |> validate_length(:name, max: 100, message: "Name cannot exceed 100 characters")
-    |> validate_length(:description, max: 500, message: "Description cannot exceed 500 characters")
+    |> validate_length(:description,
+      max: 500,
+      message: "Description cannot exceed 500 characters"
+    )
   end
 end

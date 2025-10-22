@@ -20,7 +20,9 @@ defmodule Backend.Accounts.User do
     |> validate_required(:name, message: "Name cannot be empty")
     |> validate_required(:email, message: "Email cannot be empty")
     |> validate_required(:password, message: "Password cannot be empty")
-    |> validate_format(:email, ~r/^[\w._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, message: "Email format invalid")
+    |> validate_format(:email, ~r/^[\w._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i,
+      message: "Email format invalid"
+    )
     |> validate_length(:password, min: 8, message: "Password must be at least 8 characters long")
     |> validate_format(:password, ~r/\d/, message: "Password must contain at least one number")
     |> unique_constraint(:email, message: "Email already registered")
@@ -31,6 +33,7 @@ defmodule Backend.Accounts.User do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
         put_change(changeset, :hashed_password, Argon2.hash_pwd_salt(pass))
+
       _ ->
         changeset
     end

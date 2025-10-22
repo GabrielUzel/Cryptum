@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
 import useDocumentChannel from "@/hooks/use-document-channel";
 import Delta from "quill-delta";
-import { updateFile } from "@/hooks/use-files";
 
 interface ColaborativeEditorProps {
   fileId: string;
@@ -14,14 +12,10 @@ interface ColaborativeEditorProps {
 
 export default function ColaborativeEditor(props: ColaborativeEditorProps) {
   const { fileId } = props;
-  const params = useParams();
-  const projectId = params.project_id as string;
   const [isConnected, setIsConnected] = useState(false);
-  const [dirty, setDirty] = useState(false);
-  const [contentDelta, setContentDelta] = useState<Delta | null>(null);
-  const [isContentLoaded, setIsContentLoaded] = useState(false);
-
-  const { connect, sendChange } = useDocumentChannel(fileId, setContentDelta);
+  const currentFileIdRef = useRef<string | null>(null);
+  const disconnectRef = useRef<(() => void) | null>(null);
+  const isInitialContentSetRef = useRef<boolean>(false);
 
   const { quill, quillRef } = useQuill({
     theme: "snow",
@@ -29,9 +23,6 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
       toolbar: false,
     },
   });
-
-  const lineNumbersRef = useRef<HTMLDivElement>(null);
-  const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   const updateLineNumbers = useCallback(() => {
     if (!lineNumbersRef.current || !quill) {
@@ -54,43 +45,83 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
     }
   }, [quill]);
 
-  useEffect(() => {
-    if (quill) {
-      quill.setContents(new Delta(), "silent");
-      setIsContentLoaded(false);
-    }
-  }, [fileId, quill]);
+  const applyContentToQuill = useCallback(
+    (content: Delta) => {
+      if (!quill || currentFileIdRef.current !== fileId) {
+        return;
+      }
 
-  useEffect(() => {
-    const disconnect = connect();
-    setIsConnected(true);
+      const currentContent = quill.getContents();
+      const isEmptyEditor =
+        currentContent.length() <= 1 ||
+        (currentContent.ops.length === 1 &&
+          typeof currentContent.ops[0].insert === "string" &&
+          currentContent.ops[0].insert === "\n");
 
-    return () => {
-      if (disconnect) disconnect();
-    };
-  }, [connect]);
+      if (!isInitialContentSetRef.current || isEmptyEditor) {
+        quill.setContents(content, "silent");
+        isInitialContentSetRef.current = true;
+      } else {
+        quill.updateContents(content, "api");
+      }
 
-  useEffect(() => {
-    if (!quill || !contentDelta) {
-      return;
-    }
+      updateLineNumbers();
+    },
+    [quill, fileId, updateLineNumbers],
+  );
 
-    if (!isContentLoaded && contentDelta.length() > 0) {
-      quill.setContents(contentDelta, "silent");
-      setIsContentLoaded(true);
-    } else if (
-      isContentLoaded &&
-      contentDelta.ops &&
-      contentDelta.ops.length > 0
-    ) {
-      quill.updateContents(contentDelta, "api");
-    }
+  const { connect, sendChange } = useDocumentChannel(
+    fileId,
+    applyContentToQuill,
+  );
 
-    updateLineNumbers();
-  }, [quill, contentDelta, updateLineNumbers, isContentLoaded]);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!quill) {
+      return;
+    }
+
+    const handleFileChange = async () => {
+      if (currentFileIdRef.current !== fileId) {
+        quill.setContents(new Delta(), "silent");
+        isInitialContentSetRef.current = false;
+        currentFileIdRef.current = fileId;
+
+        if (disconnectRef.current) {
+          disconnectRef.current();
+          disconnectRef.current = null;
+        }
+
+        if (fileId) {
+          const disconnect = await connect();
+          disconnectRef.current = disconnect;
+          setIsConnected(true);
+        }
+      }
+    };
+
+    handleFileChange();
+
+    return () => {
+      if (currentFileIdRef.current === fileId) {
+        if (disconnectRef.current) {
+          disconnectRef.current();
+          disconnectRef.current = null;
+        }
+        currentFileIdRef.current = null;
+        isInitialContentSetRef.current = false;
+      }
+
+      if (quill) {
+        quill.setContents(new Delta(), "silent");
+      }
+    };
+  }, [fileId, quill, connect]);
+
+  useEffect(() => {
+    if (!quill || currentFileIdRef.current !== fileId) {
       return;
     }
 
@@ -103,9 +134,10 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
         return;
       }
 
-      setDirty(true);
-      sendChange(delta);
-      updateLineNumbers();
+      if (currentFileIdRef.current === fileId) {
+        sendChange(delta);
+        updateLineNumbers();
+      }
     };
 
     quill.on("text-change", handleTextChange);
@@ -113,32 +145,7 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
     return () => {
       quill.off("text-change", handleTextChange);
     };
-  }, [quill, sendChange, updateLineNumbers]);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!dirty || !quill || !isContentLoaded) {
-        return;
-      }
-
-      try {
-        await updateFile(projectId, fileId, quill.getText());
-        setDirty(false);
-      } catch (err) {
-        console.error("Failed to auto-save:", err);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [dirty, quill, projectId, fileId, isContentLoaded]);
-
-  useEffect(() => {
-    if (!quill) {
-      return;
-    }
-
-    updateLineNumbers();
-  }, [quill, updateLineNumbers]);
+  }, [quill, sendChange, updateLineNumbers, fileId]);
 
   useEffect(() => {
     if (!lineNumbersRef.current || !editorWrapperRef.current) {
@@ -146,13 +153,17 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
     }
 
     const handleScroll = () => {
-      lineNumbersRef.current!.scrollTop = editorWrapperRef.current!.scrollTop;
+      if (lineNumbersRef.current && editorWrapperRef.current) {
+        lineNumbersRef.current.scrollTop = editorWrapperRef.current.scrollTop;
+      }
     };
 
     const wrapper = editorWrapperRef.current;
     wrapper.addEventListener("scroll", handleScroll);
 
-    return () => wrapper.removeEventListener("scroll", handleScroll);
+    return () => {
+      wrapper.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -244,14 +255,13 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
     observer.observe(editor, { childList: true, subtree: true });
     updateLineNumbers();
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [quill, updateLineNumbers]);
 
   return (
     <section className="flex-[2] bg-card p-4 rounded-lg flex flex-col h-full overflow-hidden">
-      {!isConnected && (
-        <p className="text-sm text-gray-400 mt-2">Conectando ao servidor...</p>
-      )}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <div
           ref={lineNumbersRef}

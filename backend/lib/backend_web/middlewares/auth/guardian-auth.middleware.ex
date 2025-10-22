@@ -11,6 +11,7 @@ defmodule Backend.GuardianAuth do
       claims
       |> Map.put("name", resource.name)
       |> Map.put("id", resource.id)
+
     {:ok, claims}
   end
 
