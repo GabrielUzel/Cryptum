@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { confirmRegister } from "@/hooks/use-user";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 export default function ConfirmRegister() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
- 
+
   const handleSubmit = async () => {
     try {
-      if(!token) {
+      if (!token) {
         throw Error;
       }
 
@@ -26,11 +26,11 @@ export default function ConfirmRegister() {
       toast.success("Conta confirmada com sucesso!");
       router.push("/auth/login");
     } catch {
-      toast.error("Houve algum problema no servidor")
+      toast.error("Houve algum problema no servidor");
     }
-  }
+  };
 
-  return(
+  return (
     <div className="flex flex-col items-center gap-2 justify-center h-screen text-white">
       <h1 className="text-2xl">Confirme a criação da sua conta.</h1>
       <Button onClick={handleSubmit} className="cursor-pointer">

@@ -13,6 +13,7 @@ interface UpdatePayload {
 interface OpenPayload {
   content: Delta;
   version: number;
+  user_role: string;
 }
 
 export default function useDocumentChannel(
@@ -22,6 +23,7 @@ export default function useDocumentChannel(
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [userRole, setUserRole] = useState<string>("guest");
   const versionRef = useRef<number>(0);
   const currentFileIdRef = useRef<string | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -59,7 +61,7 @@ export default function useDocumentChannel(
     versionRef.current = 0;
     currentFileIdRef.current = fileId;
 
-    const socket = createSocket();
+    const socket = await createSocket();
     socketRef.current = socket;
 
     const channel = socket.channel(`document:${fileId}`, {});
@@ -80,6 +82,10 @@ export default function useDocumentChannel(
     const handleOpen = (payload: OpenPayload) => {
       if (currentFileIdRef.current === fileId) {
         versionRef.current = payload.version;
+
+        if (payload.user_role) {
+          setUserRole(payload.user_role);
+        }
 
         const contentDelta =
           payload.content && payload.content.ops
@@ -122,6 +128,10 @@ export default function useDocumentChannel(
   }, [fileId, setContent, cleanupChannel]);
 
   const sendChange = (delta: Delta) => {
+    if (userRole === "guest") {
+      return;
+    }
+
     if (
       channelRef.current &&
       isConnected &&
@@ -147,5 +157,9 @@ export default function useDocumentChannel(
     };
   }, []);
 
-  return { connect, sendChange, isConnected };
+  return {
+    connect,
+    sendChange,
+    canEdit: userRole === "admin" || userRole === "member",
+  };
 }

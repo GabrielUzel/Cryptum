@@ -1,4 +1,12 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 type DeleteFileDialogProps = {
@@ -7,17 +15,17 @@ type DeleteFileDialogProps = {
   onDelete: () => void;
 };
 
-export default function DeleteFileDialog(
-  props: DeleteFileDialogProps
-) {
+export default function DeleteFileDialog(props: DeleteFileDialogProps) {
   const { open, setOpen, onDelete } = props;
 
-  return(
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="text-white flex flex-col gap-16 border-card">
         <DialogHeader className="text-white">
           <DialogTitle>Excluir Arquivo</DialogTitle>
-          <DialogDescription>Tem certeza que deseja excluir este arquivo?</DialogDescription>
+          <DialogDescription>
+            Tem certeza que deseja excluir este arquivo?
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button

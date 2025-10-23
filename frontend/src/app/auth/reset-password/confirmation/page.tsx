@@ -1,8 +1,14 @@
-"use client"
+"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { resetPassword } from "@/hooks/use-user";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,35 +54,34 @@ export default function ResetPasswordConfirmation() {
       toast.success("Senha modificada!");
       router.push("/auth/login");
     } catch {
-      toast.error("Houve algum erro inesperado.")
+      toast.error("Houve algum erro inesperado.");
     }
-  }
+  };
 
-  return(
+  return (
     <div className="flex flex-col justify-center h-screen items-center">
       <Card className="flex text-white border-card">
         <CardHeader>
-          <CardTitle>
-            Redefinir senha
-          </CardTitle>
-          <CardDescription>
-            Informe sua nova senha.
-          </CardDescription>
+          <CardTitle>Redefinir senha</CardTitle>
+          <CardDescription>Informe sua nova senha.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            {error ? 
-              <ErrorMessage direction="row" message={error} textsize="text-sm" /> : 
+            {error ? (
+              <ErrorMessage
+                direction="row"
+                message={error}
+                textsize="text-sm"
+              />
+            ) : (
               <span className="h-5"></span>
-            }
+            )}
             <div className="flex flex-col gap-2">
-              <Label>
-                Senha
-              </Label>
+              <Label>Senha</Label>
               <div>
-                <Input 
+                <Input
                   className="border-gray-700 focus-visible:ring-card focus:!border-background"
-                  type={isPasswordVisible ? "text" : "password"} 
+                  type={isPasswordVisible ? "text" : "password"}
                   id="password"
                   name="password"
                   value={password}

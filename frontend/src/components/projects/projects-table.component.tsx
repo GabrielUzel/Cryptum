@@ -8,15 +8,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import TablePopover from './table-popover.component';
+} from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import TablePopover from "./table-popover.component";
 import UpdateProjectDialog from "./dialogs/update-dialog.component";
 import DeleteProjectDialog from "./dialogs/delete-dialog.component";
 import ShareProjectDialog from "./dialogs/share-dialog.component";
 import ManageMembersDialog from "./dialogs/manage-members-dialog";
 import { deleteProject, updateProject } from "@/hooks/use-projects";
-import { getProjectMembers, shareProject, manageProjectMembers } from "@/hooks/use-project-members";
+import {
+  getProjectMembers,
+  shareProject,
+  manageProjectMembers,
+} from "@/hooks/use-project-members";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -24,7 +32,7 @@ type Project = {
   id: string;
   name: string;
   description: string;
-}
+};
 
 type ProjectMember = {
   project_id: string;
@@ -34,17 +42,17 @@ type ProjectMember = {
 };
 
 type ProjectsTableProps = {
-  data:Project[];
+  data: Project[];
 };
 
-export default function ProjectsTable(
-  props: ProjectsTableProps
-) {
+export default function ProjectsTable(props: ProjectsTableProps) {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openShare, setOpenShare] = useState(false);
   const [openMembers, setOpenMembers] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
+  );
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const { data } = props;
 
@@ -53,17 +61,17 @@ export default function ProjectsTable(
   const openUpdateDialog = (projectId: string) => {
     setSelectedProjectId(projectId);
     setOpenUpdate(true);
-  }
+  };
 
   const openDeleteDialog = (projectId: string) => {
     setSelectedProjectId(projectId);
     setOpenDelete(true);
-  }
+  };
 
   const openShareDialog = (projectId: string) => {
     setSelectedProjectId(projectId);
     setOpenShare(true);
-  }
+  };
 
   const openManageMembersDialog = async (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -72,43 +80,49 @@ export default function ProjectsTable(
     await getProjectMembers(projectId).then((data) => {
       setMembers(data);
     });
-  }
+  };
 
-  const onUpdate = async (projectId: string, name?: string, description?: string, setDialogError?: (error: string | null) => void) => {    
-    if(setDialogError) {
+  const onUpdate = async (
+    projectId: string,
+    name?: string,
+    description?: string,
+    setDialogError?: (error: string | null) => void,
+  ) => {
+    if (setDialogError) {
       setDialogError(null);
     }
 
     try {
       await updateProject(projectId, name, description);
-      queryClient.invalidateQueries({ queryKey: ['getProjects'] });
+      queryClient.invalidateQueries({ queryKey: ["getProjects"] });
       toast.success("Projeto atualizado com sucesso!");
-    } catch(error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.status === 400) {
-        const errorMessage = "Este nome pertence a um projeto que já existe ou os campos são inválidos.";
+        const errorMessage =
+          "Este nome pertence a um projeto que já existe ou os campos são inválidos.";
 
-        if(setDialogError) {
+        if (setDialogError) {
           setDialogError(errorMessage);
-        } 
+        }
 
-        throw new Error(errorMessage); 
+        throw new Error(errorMessage);
       }
 
       toast.error("Erro ao criar arquivo", {
-        description: "Tente novamente mais tarde."
+        description: "Tente novamente mais tarde.",
       });
     }
-  }
+  };
 
   const onDelete = async (projectId: string) => {
     try {
       await deleteProject(projectId);
-      queryClient.invalidateQueries({ queryKey: ['getProjects'] });
+      queryClient.invalidateQueries({ queryKey: ["getProjects"] });
       toast.success("Projeto excluído com sucesso!");
     } catch {
       toast.error("Houve algum erro, tente novamente mais tarde.");
     }
-  }
+  };
 
   const onShare = async (projectId: string, email: string, role: string) => {
     try {
@@ -117,41 +131,59 @@ export default function ProjectsTable(
     } catch {
       toast.error("Houve algum erro, tente novamente mais tarde.");
     }
-  }
+  };
 
-  const onManageMembers = async (projectId: string, updates: { member_id: string; new_role: string; }[], deletes: {member_id: string}[]) => {
+  const onManageMembers = async (
+    projectId: string,
+    updates: { member_id: string; new_role: string }[],
+    deletes: { member_id: string }[],
+  ) => {
     try {
       await manageProjectMembers(projectId, updates, deletes);
       toast.success("Membros atualizados com sucesso!");
     } catch {
       toast.error("Houve algum erro, tente novamente mais tarde.");
     }
-  }
+  };
 
   return (
     <>
-      <Table className="[&>tbody>tr]:border-b-2 [&>tbody>tr]:border-card">    
+      <Table className="[&>tbody>tr]:border-b-2 [&>tbody>tr]:border-card">
         <TableHeader>
           <TableRow className="hover:bg-secondary">
-            <TableHead className="text-white p-5 border-b-2 border-card">Nome</TableHead>
-            <TableHead className="text-white p-5 border-b-2 border-card">Descrição</TableHead>
-            <TableHead className="text-white p-5 border-b-2 border-card"><span></span></TableHead>
+            <TableHead className="text-white p-5 border-b-2 border-card">
+              Nome
+            </TableHead>
+            <TableHead className="text-white p-5 border-b-2 border-card">
+              Descrição
+            </TableHead>
+            <TableHead className="text-white p-5 border-b-2 border-card">
+              <span></span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-            {data?.map((project: Project) => (
+          {data?.map((project: Project) => (
             <TableRow key={project.id} className="hover:bg-secondary">
               <TableCell className="p-0">
-                <Link key={project.id} href={`/project/${project.id}`} className="block w-full h-full p-5">
+                <Link
+                  key={project.id}
+                  href={`/project/${project.id}`}
+                  className="block w-full h-full p-5"
+                >
                   {project.name}
                 </Link>
               </TableCell>
               <TableCell className="p-0">
-                <Link key={project.id} href={`/project/${project.id}`} className="block w-full h-full p-5">
+                <Link
+                  key={project.id}
+                  href={`/project/${project.id}`}
+                  className="block w-full h-full p-5"
+                >
                   <Tooltip>
                     <TooltipTrigger>
                       {project.description.length > 30
-                        ? project.description.slice(0, 30) + '...'
+                        ? project.description.slice(0, 30) + "..."
                         : project.description}
                     </TooltipTrigger>
                     <TooltipContent className="bg-background">
@@ -161,7 +193,7 @@ export default function ProjectsTable(
                 </Link>
               </TableCell>
               <TableCell className="p-5">
-                <TablePopover 
+                <TablePopover
                   projectId={project.id}
                   updateAction={openUpdateDialog}
                   deleteAction={openDeleteDialog}
@@ -174,8 +206,13 @@ export default function ProjectsTable(
         </TableBody>
       </Table>
       <UpdateProjectDialog
-        initialName={data?.find(project => project.id === selectedProjectId)?.name || ""}
-        initialDescription={data?.find(project => project.id === selectedProjectId)?.description || ""}
+        initialName={
+          data?.find((project) => project.id === selectedProjectId)?.name || ""
+        }
+        initialDescription={
+          data?.find((project) => project.id === selectedProjectId)
+            ?.description || ""
+        }
         open={openUpdate}
         setOpen={setOpenUpdate}
         projectId={selectedProjectId}

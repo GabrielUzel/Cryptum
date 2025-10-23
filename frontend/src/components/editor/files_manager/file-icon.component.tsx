@@ -5,16 +5,17 @@ import Image from "next/image";
 const maxNameLength = 15;
 
 interface FileIconProps {
-  fileName: string
-  fileSize: string
-  removeFile: () => void
+  fileName: string;
+  fileSize: string;
+  removeFile: () => void;
 }
 
-export default function FileIcon(
-  props: FileIconProps
-) {
+export default function FileIcon(props: FileIconProps) {
   const { fileName, fileSize, removeFile } = props;
-  const nameToDisplay = fileName.length > maxNameLength ? fileName.slice(0, maxNameLength) + "..." : fileName;
+  const nameToDisplay =
+    fileName.length > maxNameLength
+      ? fileName.slice(0, maxNameLength) + "..."
+      : fileName;
 
   return (
     <Card className="p-2 pl-4 group text-white border-card">
@@ -31,11 +32,9 @@ export default function FileIcon(
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <p className="text-sm w-16 text-right">
-            {fileSize} KB
-          </p>
-          <Button 
-            className="hover:bg-transparent cursor-pointer shadow-none bg-transparent p-1 w-fit h-fit opacity-0 group-hover:opacity-100 transition-opacity" 
+          <p className="text-sm w-16 text-right">{fileSize} KB</p>
+          <Button
+            className="hover:bg-transparent cursor-pointer shadow-none bg-transparent p-1 w-fit h-fit opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={removeFile}
           >
             <Image

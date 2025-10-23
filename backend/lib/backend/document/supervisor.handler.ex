@@ -6,12 +6,10 @@ defmodule Backend.Document.Supervisor do
   end
 
   @impl true
-  @spec init(:ok) :: {:ok, {:supervisor.sup_flags(), [:supervisor.child_spec()]}}
   def init(:ok) do
     DynamicSupervisor.init(
       strategy: :one_for_one,
-      max_children: 100,
-      restart: :temporary
+      max_children: 100
     )
   end
 end

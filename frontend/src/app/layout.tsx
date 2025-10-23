@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource/inter/index.css";
 import "./globals.css";
 import ReactQueryProvider from "@/providers/react-query.provider";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Cryptum",
@@ -17,11 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ReactQueryProvider>
-        <body
-          className="font-sans antialiased bg-background text-foreground min-h-screen"
-        >
+        <body className="font-sans antialiased bg-background text-foreground min-h-screen">
           {children}
-          <Toaster 
+          <Toaster
             position="top-center"
             className="bg-background text-white border border-card"
           />

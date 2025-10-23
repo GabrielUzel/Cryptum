@@ -8,7 +8,7 @@ export default function Home() {
       <SidebarComponent />
       <main className="flex-1 p-8">
         <ClientOnly>
-          <ProjectsTable type="all"/>
+          <ProjectsTable type="all" />
         </ClientOnly>
       </main>
     </div>

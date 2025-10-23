@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
 import useDocumentChannel from "@/hooks/use-document-channel";
@@ -12,7 +12,6 @@ interface ColaborativeEditorProps {
 
 export default function ColaborativeEditor(props: ColaborativeEditorProps) {
   const { fileId } = props;
-  const [isConnected, setIsConnected] = useState(false);
   const currentFileIdRef = useRef<string | null>(null);
   const disconnectRef = useRef<(() => void) | null>(null);
   const isInitialContentSetRef = useRef<boolean>(false);
@@ -70,10 +69,16 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
     [quill, fileId, updateLineNumbers],
   );
 
-  const { connect, sendChange } = useDocumentChannel(
+  const { connect, sendChange, canEdit } = useDocumentChannel(
     fileId,
     applyContentToQuill,
   );
+
+  useEffect(() => {
+    if (quill) {
+      quill.enable(canEdit);
+    }
+  }, [quill, canEdit]);
 
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
@@ -97,7 +102,6 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
         if (fileId) {
           const disconnect = await connect();
           disconnectRef.current = disconnect;
-          setIsConnected(true);
         }
       }
     };
@@ -262,6 +266,11 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
 
   return (
     <section className="flex-[2] bg-card p-4 rounded-lg flex flex-col h-full overflow-hidden">
+      {!canEdit && (
+        <div className="bg-yellow-500 text-white p-2 rounded text-center mb-2">
+          Modo leitura
+        </div>
+      )}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <div
           ref={lineNumbersRef}

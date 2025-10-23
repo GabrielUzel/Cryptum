@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -13,9 +20,7 @@ type CreateProjectDialogProps = {
   onCreate: (name: string, description: string) => void;
 };
 
-export default function CreateProjectDialog(
-  props: CreateProjectDialogProps
-) {
+export default function CreateProjectDialog(props: CreateProjectDialogProps) {
   const { open, setOpen, onCreate } = props;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -45,28 +50,33 @@ export default function CreateProjectDialog(
       <DialogContent className="text-white flex flex-col gap-8 border-card">
         <DialogHeader>
           <DialogTitle>Criar novo projeto</DialogTitle>
-          <DialogDescription>Insira o nome e a descrição do projeto.</DialogDescription>
+          <DialogDescription>
+            Insira o nome e a descrição do projeto.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
             <Input
               placeholder="Nome do projeto"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               required
               className="border-card focus-visible:ring-card focus:!border-card"
             />
             <Textarea
               placeholder="Descrição"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               className="border-card focus-visible:ring-card focus:!border-card"
               rows={4}
               maxLength={300}
             />
           </div>
           <DialogFooter>
-            <Button type="submit" className="!bg-primary hover:!bg-primary/60 cursor-pointer">
+            <Button
+              type="submit"
+              className="!bg-primary hover:!bg-primary/60 cursor-pointer"
+            >
               Criar
             </Button>
             <DialogClose asChild>

@@ -23,7 +23,9 @@ defmodule Backend.ProjectsRepository do
     base_query =
       ProjectMember
       |> where([project_member], project_member.user_id == ^user_id)
-      |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
+      |> join(:inner, [project_member], project in Project,
+        on: project_member.project_id == project.id
+      )
       |> select([project_member, project], project)
 
     projects =
@@ -52,7 +54,9 @@ defmodule Backend.ProjectsRepository do
     base_query =
       ProjectMember
       |> where([pm], pm.user_id == ^user_id and pm.role == "admin")
-      |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
+      |> join(:inner, [project_member], project in Project,
+        on: project_member.project_id == project.id
+      )
       |> select([project_member, project], project)
 
     projects =
@@ -81,7 +85,9 @@ defmodule Backend.ProjectsRepository do
     base_query =
       ProjectMember
       |> where([pm], pm.user_id == ^user_id and pm.role in ["member"])
-      |> join(:inner, [project_member], project in Project, on: project_member.project_id == project.id)
+      |> join(:inner, [project_member], project in Project,
+        on: project_member.project_id == project.id
+      )
       |> select([project_member, project], project)
 
     projects =
@@ -108,7 +114,8 @@ defmodule Backend.ProjectsRepository do
 
   def update_project(id, name, description) do
     case Repo.get(Project, id) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
 
       project ->
         attrs =
@@ -125,7 +132,6 @@ defmodule Backend.ProjectsRepository do
   def delete_project(id) do
     case Repo.get(Project, id) do
       nil -> {:error, :not_found}
-
       project -> Repo.delete(project)
     end
   end
@@ -139,7 +145,7 @@ defmodule Backend.ProjectsRepository do
       name: user.name,
       project_id: project_member.project_id,
       user_id: user.id,
-      role: project_member.role,
+      role: project_member.role
     })
     |> Repo.all()
   end
@@ -156,27 +162,46 @@ defmodule Backend.ProjectsRepository do
 
   def is_admin?(user_id, project_id) do
     ProjectMember
-    |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role == "admin")
+    |> where(
+      [project_member],
+      project_member.project_id == ^project_id and project_member.user_id == ^user_id and
+        project_member.role == "admin"
+    )
     |> Repo.exists?()
   end
 
   def is_at_least_member?(user_id, project_id) do
     ProjectMember
-    |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role in ["admin", "member"])
+    |> where(
+      [project_member],
+      project_member.project_id == ^project_id and project_member.user_id == ^user_id and
+        project_member.role in ["admin", "member"]
+    )
     |> Repo.exists?()
   end
 
   def is_at_least_guest?(user_id, project_id) do
     ProjectMember
-    |> where([project_member], project_member.project_id == ^project_id and project_member.user_id == ^user_id and project_member.role in ["admin", "member", "guest"])
+    |> where(
+      [project_member],
+      project_member.project_id == ^project_id and project_member.user_id == ^user_id and
+        project_member.role in ["admin", "member", "guest"]
+    )
     |> Repo.exists?()
   end
 
-  def get_project_member(id), do: Repo.get(ProjectMember, id)
+  def get_project_member(user_id, project_id) do
+    Repo.get_by(ProjectMember, user_id: user_id, project_id: project_id)
+  end
+
+  def get_project_member(member_id) do
+    Repo.get(ProjectMember, member_id)
+  end
 
   def update_project_member(memberId, newRole) do
     case Repo.get(ProjectMember, memberId) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
 
       member ->
         member
@@ -188,7 +213,6 @@ defmodule Backend.ProjectsRepository do
   def delete_project_member(member_id) do
     case Repo.get(ProjectMember, member_id) do
       nil -> {:error, :not_found}
-
       member -> Repo.delete(member)
     end
   end

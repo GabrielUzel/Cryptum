@@ -8,7 +8,6 @@ import { downloadFile } from "@/hooks/use-files";
 import RenameFileDialog from "./rename-file-dialog.component";
 import DeleteFileDialog from "./delete-file-dialog.component";
 import { renameFile, deleteFile } from "@/hooks/use-files";
-import { on } from "node:stream";
 
 type FileCardProps = {
   projectId: string;

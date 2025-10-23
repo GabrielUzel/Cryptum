@@ -38,7 +38,7 @@ defmodule Backend.Document do
     local_path = Path.join(dir_path, filename)
 
     content = load_content_from_azure(filename)
-    quill_delta = %{"ops" => [%{"insert" => content || ""}]}
+    quill_delta = %{"ops" => [%{"insert" => content}]}
     text_delta = DeltaConverter.quill_to_text_delta(quill_delta)
 
     state = %{
@@ -69,9 +69,6 @@ defmodule Backend.Document do
 
       {:error, reason} ->
         Logger.error("Error loading from Azure for #{filename}: #{inspect(reason)}")
-        ""
-
-      _ ->
         ""
     end
   end
@@ -127,7 +124,6 @@ defmodule Backend.Document do
       end
     end
 
-    # Remove temp file
     if state.file_created do
       case File.rm(state.local_path) do
         :ok ->

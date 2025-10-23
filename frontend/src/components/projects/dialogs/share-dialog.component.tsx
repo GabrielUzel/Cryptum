@@ -1,9 +1,23 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ShareProjectDialogProps = {
   open: boolean;
@@ -12,9 +26,7 @@ type ShareProjectDialogProps = {
   onShare: (projectId: string, email: string, role: string) => void;
 };
 
-export default function ShareProjectDialog(
-  props: ShareProjectDialogProps
-) {
+export default function ShareProjectDialog(props: ShareProjectDialogProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("guest");
   const { open, setOpen, projectId, onShare } = props;
@@ -25,13 +37,13 @@ export default function ShareProjectDialog(
         <div className="flex flex-col gap-8">
           <DialogHeader className="text-white">
             <DialogTitle>Compartilhar projeto</DialogTitle>
-            <DialogDescription>Envie um convite para o email desejado</DialogDescription>
+            <DialogDescription>
+              Envie um convite para o email desejado
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label>
-                Email
-              </Label>
+              <Label>Email</Label>
               <Input
                 className="border-card focus-visible:ring-card focus:!border-card"
                 id="email"
@@ -41,13 +53,23 @@ export default function ShareProjectDialog(
               />
             </div>
             <div>
-              <Select value={role} onValueChange={ (value) => setRole(value) }>
+              <Select value={role} onValueChange={(value) => setRole(value)}>
                 <SelectTrigger className="w-fit cursor-pointer border-card">
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent className="bg-background text-white border-card">
-                  <SelectItem className="cursor-pointer data-[highlighted]:bg-card data-[highlighted]:text-white" value="guest">Leitor</SelectItem>
-                  <SelectItem className="cursor-pointer data-[highlighted]:bg-card data-[highlighted]:text-white" value="member">Editor</SelectItem>
+                  <SelectItem
+                    className="cursor-pointer data-[highlighted]:bg-card data-[highlighted]:text-white"
+                    value="guest"
+                  >
+                    Leitor
+                  </SelectItem>
+                  <SelectItem
+                    className="cursor-pointer data-[highlighted]:bg-card data-[highlighted]:text-white"
+                    value="member"
+                  >
+                    Editor
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

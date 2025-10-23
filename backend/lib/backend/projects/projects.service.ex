@@ -10,7 +10,10 @@ defmodule Backend.Projects.ProjectsService do
 
   def create_project(user_id, name, description) do
     Ecto.Multi.new()
-    |> Ecto.Multi.insert(:project, Project.changeset(%Project{}, %{"name" => name, "description" => description}))
+    |> Ecto.Multi.insert(
+      :project,
+      Project.changeset(%Project{}, %{"name" => name, "description" => description})
+    )
     |> Ecto.Multi.run(:admin_member, fn _repo, %{project: project} ->
       ProjectsRepository.create_project_member(project.id, user_id, "admin")
     end)
@@ -26,15 +29,27 @@ defmodule Backend.Projects.ProjectsService do
   end
 
   def get_projects(user_id, page, itemsPerPage) do
-    ProjectsRepository.list_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
+    ProjectsRepository.list_projects(
+      user_id,
+      String.to_integer(page),
+      String.to_integer(itemsPerPage)
+    )
   end
 
   def get_admin_projects(user_id, page, itemsPerPage) do
-    ProjectsRepository.list_admin_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
+    ProjectsRepository.list_admin_projects(
+      user_id,
+      String.to_integer(page),
+      String.to_integer(itemsPerPage)
+    )
   end
 
   def get_non_admin_projects(user_id, page, itemsPerPage) do
-    ProjectsRepository.list_non_admin_projects(user_id, String.to_integer(page), String.to_integer(itemsPerPage))
+    ProjectsRepository.list_non_admin_projects(
+      user_id,
+      String.to_integer(page),
+      String.to_integer(itemsPerPage)
+    )
   end
 
   def update_project(user_id, project_id, name, description) do
@@ -142,7 +157,9 @@ defmodule Backend.Projects.ProjectsService do
 
         Enum.each(deletes, fn %{"member_id" => member_id} ->
           case ProjectsRepository.get_project_member(member_id) do
-            nil -> Repo.rollback({:error, :not_found})
+            nil ->
+              Repo.rollback({:error, :not_found})
+
             member ->
               if member.role == "admin" do
                 Repo.rollback({:error, :cannot_remove_admin})
@@ -157,8 +174,26 @@ defmodule Backend.Projects.ProjectsService do
     end
   end
 
+  def is_at_least_guest?(user_id, project_id) do
+    ProjectsRepository.is_at_least_guest?(user_id, project_id)
+  end
+
+  def get_user_role(user_id, project_id) do
+    case ProjectsRepository.get_project_member(user_id, project_id) do
+      nil -> nil
+      member -> member.role
+    end
+  end
+
   defp send_invite(sender_nickname, project_id, invitee_id, invitee_email, role) do
-    token = Phoenix.Token.sign(BackendWeb.Endpoint, "invite", [project_id, invitee_id, invitee_email, role], max_age: 86400)
+    token =
+      Phoenix.Token.sign(
+        BackendWeb.Endpoint,
+        "invite",
+        [project_id, invitee_id, invitee_email, role],
+        max_age: 86400
+      )
+
     frontend_base_url = Application.get_env(:backend, :frontend_url) || "http://localhost:3000"
     invitation_url = frontend_base_url <> "/project/invitation?token=#{token}"
 

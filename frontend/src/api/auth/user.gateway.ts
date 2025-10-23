@@ -6,7 +6,7 @@ export class UserGateway {
   constructor() {
     this.client = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
@@ -16,9 +16,9 @@ export class UserGateway {
   }
 
   public async login(email: string, password: string) {
-    const response = await this.client.post("/api/auth/login", { 
-      email, 
-      password 
+    const response = await this.client.post("/api/auth/login", {
+      email,
+      password,
     });
 
     return response.data;
@@ -33,7 +33,7 @@ export class UserGateway {
     const response = await this.client.post("/api/auth/register", {
       name,
       email,
-      password
+      password,
     });
 
     return response.data;
@@ -41,7 +41,7 @@ export class UserGateway {
 
   public async confirmRegister(token: string) {
     const response = await this.client.put("/api/auth/register/confirm", {
-      token
+      token,
     });
 
     return response.data;
@@ -49,8 +49,8 @@ export class UserGateway {
 
   public async sendEmailResetPassword(email: string) {
     const response = await this.client.post("/api/auth/email-reset-password", {
-      email
-    })
+      email,
+    });
 
     return response.data;
   }
@@ -58,7 +58,7 @@ export class UserGateway {
   public async resetPassword(password: string, token: string) {
     const response = await this.client.put("/api/auth/reset-password", {
       password,
-      token
+      token,
     });
 
     return response.data;

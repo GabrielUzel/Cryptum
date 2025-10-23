@@ -8,7 +8,7 @@ export default function OwnerProjects() {
       <SidebarComponent />
       <main className="flex-1 p-8">
         <ClientOnly>
-          <ProjectsTable type="admin"/>
+          <ProjectsTable type="admin" />
         </ClientOnly>
       </main>
     </div>

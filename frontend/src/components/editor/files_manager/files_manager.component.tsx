@@ -19,7 +19,6 @@ export default function FilesManager(props: FilesManagerProps) {
   } = props;
 
   const checkIfFileIsEditable = (filename: string): boolean => {
-    console.log(filename);
     const extension = filename.split(".").pop()?.toLowerCase();
     return extension === "tex";
   };
@@ -31,7 +30,7 @@ export default function FilesManager(props: FilesManagerProps) {
   };
 
   return (
-    <section className="flex-1 bg-card rounded-lg">
+    <section className="bg-card rounded-lg">
       <div className="bg-primary relative flex p-2 items-center rounded-tl-lg rounded-tr-lg">
         <NewFileDialog projectId={projectId} />
       </div>

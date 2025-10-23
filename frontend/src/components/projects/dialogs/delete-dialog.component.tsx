@@ -1,4 +1,12 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 type DeleteProjectDialogProps = {
@@ -8,9 +16,7 @@ type DeleteProjectDialogProps = {
   onDelete: (projectId: string) => void;
 };
 
-export default function DeleteProjectDialog(
-  props: DeleteProjectDialogProps
-) {
+export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
   const { open, setOpen, projectId, onDelete } = props;
 
   return (
@@ -18,7 +24,9 @@ export default function DeleteProjectDialog(
       <DialogContent className="text-white flex flex-col gap-16 border-card">
         <DialogHeader className="text-white">
           <DialogTitle>Excluir projeto</DialogTitle>
-          <DialogDescription>Tem certeza que deseja excluir este projeto?</DialogDescription>
+          <DialogDescription>
+            Tem certeza que deseja excluir este projeto?
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button

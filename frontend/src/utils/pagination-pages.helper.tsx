@@ -1,4 +1,7 @@
-export default function getVisiblePages(currentPage: number, totalPages: number): number[] {
+export default function getVisiblePages(
+  currentPage: number,
+  totalPages: number,
+): number[] {
   const totalPageNumbers = 6;
 
   if (totalPages <= totalPageNumbers) {
@@ -20,7 +23,12 @@ export default function getVisiblePages(currentPage: number, totalPages: number)
   }
 
   if (showLeftDots && !showRightDots) {
-    return [1, ...Array(5).fill(null).map((_, i) => totalPages - 4 + i)];
+    return [
+      1,
+      ...Array(5)
+        .fill(null)
+        .map((_, i) => totalPages - 4 + i),
+    ];
   }
 
   return [currentPage];

@@ -8,7 +8,7 @@ export default function SharedProjects() {
       <SidebarComponent />
       <main className="flex-1 p-8">
         <ClientOnly>
-          <ProjectsTable type="member"/>
+          <ProjectsTable type="member" />
         </ClientOnly>
       </main>
     </div>

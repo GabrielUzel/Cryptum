@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function ConfirmationSent() {
-  return(
+  return (
     <div className="flex flex-col items-center gap-2 justify-center h-screen text-white">
       <h1 className="text-2xl">Um email foi enviado a sua caixa de entrada!</h1>
       <p>Autorize sua conta para poder utilizar o site.</p>

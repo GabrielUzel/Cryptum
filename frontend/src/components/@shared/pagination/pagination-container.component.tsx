@@ -5,29 +5,27 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis
-} from "@/components/ui/pagination"
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import ItemsPerPageSelector from "./items-per-page-selector.component";
 
 type PaginationContainerProps = {
-  page: number, 
-  totalPages: number,
-  setPage: (page: number) => void,
-  itemsPerPage: string,
-  setItemsPerPage: (itemsPerPage: string) => void
+  page: number;
+  totalPages: number;
+  setPage: (page: number) => void;
+  itemsPerPage: string;
+  setItemsPerPage: (itemsPerPage: string) => void;
 };
 
-export default function PaginationContainer(
-  props: PaginationContainerProps
-) {
+export default function PaginationContainer(props: PaginationContainerProps) {
   const { page, totalPages, setPage, itemsPerPage, setItemsPerPage } = props;
-  
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) {
       return;
     }
     setPage(newPage);
-  }
+  };
 
   const showPaginationItems = (start: number, end: number) => {
     return Array.from({ length: end - start + 1 }, (_, index) => {
@@ -44,12 +42,12 @@ export default function PaginationContainer(
         </PaginationItem>
       );
     });
-  }
+  };
 
   const getPagination = () => {
     const totalPageNumbers = 6;
 
-    if(totalPageNumbers >= totalPages) {
+    if (totalPageNumbers >= totalPages) {
       return showPaginationItems(1, totalPages);
     }
 
@@ -138,16 +136,19 @@ export default function PaginationContainer(
         </>
       );
     }
-  }
+  };
 
   return (
     <div className="flex justify-center gap-2">
       <Pagination className="w-max m-0">
         <PaginationContent>
           <PaginationItem key="prev">
-            <PaginationPrevious 
+            <PaginationPrevious
               className="hover:bg-card hover:text-white cursor-pointer"
-              onClick={e => { e.preventDefault(); handlePageChange(page - 1); }} 
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(page - 1);
+              }}
             />
           </PaginationItem>
 
@@ -156,12 +157,18 @@ export default function PaginationContainer(
           <PaginationItem key="next">
             <PaginationNext
               className="hover:bg-card hover:text-white cursor-pointer"
-              onClick={e => { e.preventDefault(); handlePageChange(page + 1); }} 
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(page + 1);
+              }}
             />
-          </PaginationItem>  
+          </PaginationItem>
         </PaginationContent>
       </Pagination>
-      <ItemsPerPageSelector itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage}/>
+      <ItemsPerPageSelector
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+      />
     </div>
   );
 }

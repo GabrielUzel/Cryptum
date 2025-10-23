@@ -37,12 +37,7 @@ defmodule BackendWeb.Router do
 
     post "/logout", LoginController, :logout
     get "/me", LoginController, :me
-  end
-
-  scope "/api/editor", BackendWeb do
-    pipe_through [:api, :auth]
-
-    get "/:filename", EditorController, :get_file
+    get "/socket-token", LoginController, :socket_token
   end
 
   scope "/api/projects", BackendWeb do
@@ -71,6 +66,12 @@ defmodule BackendWeb.Router do
     get "/:project_id/file/:file_id", FilesController, :download
     put "/:project_id/file/:file_id/rename", FilesController, :rename
     delete "/:project_id/file/:file_id", FilesController, :delete
+  end
+
+  scope "/api/compiler", BackendWeb do
+    pipe_through [:api, :auth]
+
+    post "/compile", CompilerController, :compile
   end
 
   if Application.compile_env(:backend, :dev_routes) do

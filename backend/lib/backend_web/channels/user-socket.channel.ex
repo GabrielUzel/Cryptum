@@ -3,13 +3,18 @@ defmodule BackendWeb.UserSocket do
   channel "document:*", BackendWeb.DocumentChannel
 
   @impl true
-  def connect(_params, socket, _connect_info) do
-    {:ok, assign(socket, :current_user, %{id: :guest, role: "guest"})}
+  def connect(%{"token" => token}, socket, _connect_info) do
+    case Backend.GuardianAuth.resource_from_token(token) do
+      {:ok, user, _claims} ->
+        {:ok, assign(socket, :current_user, %{id: user.id})}
+
+      {:error, _reason} ->
+        :error
+    end
   end
+
+  def connect(_params, _socket, _connect_info), do: :error
 
   @impl true
   def id(socket), do: "users_socket:#{socket.assigns.current_user.id}"
-
-  defp authorized?(%{role: role}) when role in ["admin", "member"], do: true
-  defp authorized?(_user), do: false
 end

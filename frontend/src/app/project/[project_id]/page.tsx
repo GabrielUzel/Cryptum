@@ -3,11 +3,18 @@
 import { getProjectInfo } from "@/hooks/use-projects";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import ProjectMenubar from "@/components/editor/menubar/menubar.component";
 import FilesManager from "@/components/editor/files_manager/files_manager.component";
 import ColaborativeEditor from "@/components/editor/colaborative_editor/colaborative_editor.component";
-import Compiler from "@/components/editor/compiler/compiler.component";
 import { ClientOnly } from "@/utils/client-only.handler";
+
+const Compiler = dynamic(
+  () => import("@/components/editor/compiler/compiler.component"),
+  {
+    ssr: false,
+  },
+);
 
 interface Project {
   name: string;
@@ -66,8 +73,8 @@ export default function ProjectPage() {
               </p>
             </div>
           )}
+          <Compiler projectId={project_id} currentFileId={currentFileId} />
         </ClientOnly>
-        <Compiler />
       </div>
     </div>
   );

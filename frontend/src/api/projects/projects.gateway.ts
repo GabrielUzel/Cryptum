@@ -6,7 +6,7 @@ export class ProjectsGateway {
   constructor() {
     this.client = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
@@ -14,8 +14,8 @@ export class ProjectsGateway {
     const response = await this.client.get(`/api/projects`, {
       params: {
         page,
-        itemsPerPage
-      }
+        itemsPerPage,
+      },
     });
 
     return response.data;
@@ -25,8 +25,8 @@ export class ProjectsGateway {
     const response = await this.client.get(`/api/projects/admin`, {
       params: {
         page,
-        itemsPerPage
-      }
+        itemsPerPage,
+      },
     });
 
     return response.data;
@@ -36,26 +36,30 @@ export class ProjectsGateway {
     const response = await this.client.get(`/api/projects/member`, {
       params: {
         page,
-        itemsPerPage
-      }
+        itemsPerPage,
+      },
     });
 
     return response.data;
   }
 
   public async createProject(name: string, description: string) {
-    const response = await this.client.post("/api/projects", { 
-      name, 
-      description 
+    const response = await this.client.post("/api/projects", {
+      name,
+      description,
     });
 
     return response.data;
   }
 
-  public async updateProject(projectId: string, name?: string, description?: string) {
-    const response = await this.client.put(`/api/projects/${projectId}`, { 
-      name, 
-      description 
+  public async updateProject(
+    projectId: string,
+    name?: string,
+    description?: string,
+  ) {
+    const response = await this.client.put(`/api/projects/${projectId}`, {
+      name,
+      description,
     });
 
     return response.data;
@@ -67,7 +71,7 @@ export class ProjectsGateway {
   }
 
   public async getProjectInfo(projectId: string) {
-    const response = await this.client.get(`/api/projects/${projectId}`)
+    const response = await this.client.get(`/api/projects/${projectId}`);
     return response.data;
   }
 }

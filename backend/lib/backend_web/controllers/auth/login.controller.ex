@@ -107,4 +107,19 @@ defmodule BackendWeb.LoginController do
         |> json(%{error: "Could not update password"})
     end
   end
+
+  def socket_token(conn, _params) do
+    case Guardian.Plug.current_resource(conn) do
+      nil ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Not authenticated"})
+
+      user ->
+        {:ok, token, _claims} =
+          Backend.GuardianAuth.encode_and_sign(user, %{}, token_type: "socket")
+
+        json(conn, %{token: token})
+    end
+  end
 end

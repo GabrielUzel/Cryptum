@@ -16,9 +16,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const redirect = searchParams.get("redirect") || "/";
 
-  const { 
-    login,
-  } = useLogin();
+  const { login } = useLogin();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,22 +26,26 @@ export default function LoginForm() {
       return;
     }
 
-    login({ email, password }, {
-      onSuccess: () => {
-        router.push(redirect);
+    login(
+      { email, password },
+      {
+        onSuccess: () => {
+          router.push(redirect);
+        },
+        onError: (error: Error) => {
+          setError(error.message);
+        },
       },
-      onError: (error: Error) => {
-        setError(error.message);
-      }
-    });
+    );
   };
 
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-      {error ? 
-        <ErrorMessage direction="row" message={error} textsize="text-sm" /> : 
+      {error ? (
+        <ErrorMessage direction="row" message={error} textsize="text-sm" />
+      ) : (
         <span className="h-5"></span>
-      }
+      )}
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -58,9 +60,9 @@ export default function LoginForm() {
       <div className="flex flex-col gap-2 relative">
         <Label htmlFor="password">Senha</Label>
         <div>
-          <Input 
+          <Input
             className="border-gray-700 focus-visible:ring-card focus:!border-background"
-            type={isPasswordVisible ? "text" : "password"} 
+            type={isPasswordVisible ? "text" : "password"}
             id="password"
             name="password"
             value={password}
@@ -78,7 +80,9 @@ export default function LoginForm() {
           </div>
         </div>
       </div>
-      <Button className="cursor-pointer" type="submit" variant="default">Login</Button>
+      <Button className="cursor-pointer" type="submit" variant="default">
+        Login
+      </Button>
     </form>
   );
 }

@@ -9,7 +9,12 @@ import LoadingSpinner from "@/components/@shared/loading-spinner";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 
-type InvitationState = "loading" | "success" | "wrong_user" | "not_authorized" | "invalid";
+type InvitationState =
+  | "loading"
+  | "success"
+  | "wrong_user"
+  | "not_authorized"
+  | "invalid";
 
 export default function ConfirmInvitation() {
   const router = useRouter();
@@ -29,18 +34,20 @@ export default function ConfirmInvitation() {
         setState("success");
         toast.success("Você foi adicionado ao projeto com sucesso!");
         router.push("/");
-      } catch(error: unknown) {
+      } catch (error: unknown) {
         if (error instanceof AxiosError) {
           switch (error.response?.status) {
             case 400:
               setState("invalid");
               break;
-            case 401: 
-              router.push(`/auth/login?redirect=/project/invitation?token=${token}`);
+            case 401:
+              router.push(
+                `/auth/login?redirect=/project/invitation?token=${token}`,
+              );
               break;
             case 403:
               setState("wrong_user");
-              break;  
+              break;
           }
         }
       }
@@ -52,11 +59,11 @@ export default function ConfirmInvitation() {
   const backToLogin = () => {
     logout();
     router.push(`/auth/login?redirect=/project/invitation?token=${token}`);
-  }
+  };
 
   const renderPage = () => {
     if (state === "loading") {
-      return(
+      return (
         <div className="flex flex-col justify-center items-center gap-2">
           <LoadingSpinner />
           <h1 className="text-xl">Processando convite</h1>
@@ -65,9 +72,11 @@ export default function ConfirmInvitation() {
     }
 
     if (state === "wrong_user") {
-      return(
+      return (
         <div className="flex flex-col justify-center items-center gap-2">
-          <h1 className="text-xl">Conta logada não corresponde a conta do convite.</h1>
+          <h1 className="text-xl">
+            Conta logada não corresponde a conta do convite.
+          </h1>
           <Button onClick={backToLogin} className="cursor-pointer">
             Ir para login
           </Button>
@@ -76,7 +85,7 @@ export default function ConfirmInvitation() {
     }
 
     if (state === "not_authorized") {
-      return(
+      return (
         <div className="flex flex-col justify-center items-center gap-2">
           <h1 className="text-xl">Login necessário</h1>
           <p>Você precisa estar logado para aceitar o convite.</p>
@@ -88,20 +97,22 @@ export default function ConfirmInvitation() {
     }
 
     if (state === "success") {
-      return(
+      return (
         <div className="flex flex-col justify-center items-center gap-2">
-          <h1 className="text-xl">Você foi adicionado ao projeto com sucesso!</h1>
+          <h1 className="text-xl">
+            Você foi adicionado ao projeto com sucesso!
+          </h1>
         </div>
       );
     }
 
-    return(
+    return (
       <div className="flex flex-col justify-center items-center gap-2">
         <h1 className="text-2xl">Erro!</h1>
         <p>Houve algum erro, tente novamente mais tarde.</p>
       </div>
     );
-  }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center text-white">

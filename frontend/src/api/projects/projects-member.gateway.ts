@@ -6,37 +6,49 @@ export class ProjectMembersGateway {
   constructor() {
     this.client = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
   public async getProjectMembers(projectId: string) {
-    const response = await this.client.get(`/api/projects/${projectId}/members`);
+    const response = await this.client.get(
+      `/api/projects/${projectId}/members`,
+    );
     return response.data;
   }
 
   public async shareProject(projectId: string, email: string, role: string) {
-    const response = await this.client.post(`/api/projects/${projectId}/share`, {
-      email,
-      role
-    });
+    const response = await this.client.post(
+      `/api/projects/${projectId}/share`,
+      {
+        email,
+        role,
+      },
+    );
 
     return response.data;
   }
 
   public async createProjectMember(token: string) {
-    const response  = await this.client.post(`/api/projects/add-member`, {
-      token
-    }) 
+    const response = await this.client.post(`/api/projects/add-member`, {
+      token,
+    });
 
     return response.data;
   }
 
-  public async manageProjectMembers(projectId: string, updates: { member_id: string; new_role: string; }[], deletes: {member_id: string}[]) {
-    const response = await this.client.put(`/api/projects/${projectId}/members/batch`, {
-      updates,
-      deletes
-    });
+  public async manageProjectMembers(
+    projectId: string,
+    updates: { member_id: string; new_role: string }[],
+    deletes: { member_id: string }[],
+  ) {
+    const response = await this.client.put(
+      `/api/projects/${projectId}/members/batch`,
+      {
+        updates,
+        deletes,
+      },
+    );
 
     return response.data;
   }

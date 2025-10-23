@@ -183,6 +183,13 @@ defmodule Backend.Files.FilesService do
     end
   end
 
+  def get_file_project_id(file_id) do
+    case FilesRepository.get_file(file_id) do
+      nil -> nil
+      file -> file.project_id
+    end
+  end
+
   defp upload_single_file(project_id, filename, content_type, content) do
     encoded_filename = URI.encode(filename)
     path = "#{project_id}/#{encoded_filename}"

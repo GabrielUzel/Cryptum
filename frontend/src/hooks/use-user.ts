@@ -1,6 +1,6 @@
-import { UserGateway } from '@/api/auth/user.gateway';
-import { AxiosError } from 'axios';
-import { useQuery } from '@tanstack/react-query'; 
+import { UserGateway } from "@/api/auth/user.gateway";
+import { AxiosError } from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 const userGateway = new UserGateway();
 
@@ -24,7 +24,7 @@ export function useLogin() {
     }: {
       onSuccess?: (data: unknown) => void;
       onError?: (error: Error) => void;
-    } = {}
+    } = {},
   ) => {
     try {
       const data = await userGateway.login(body.email, body.password);
@@ -35,7 +35,7 @@ export function useLogin() {
       if (error && typeof error === "object" && "isAxiosError" in error) {
         const axiosError = error as AxiosError<{ error: string }>;
 
-        if(axiosError.response?.data?.error) {
+        if (axiosError.response?.data?.error) {
           reason = "Email ou senha incorretos";
         } else {
           reason = "Houve um erro no servidor, tente novamente mais tarde.";
@@ -56,7 +56,7 @@ export const logout = async () => {
   } catch (error) {
     throw error;
   }
-}
+};
 
 export const useRegister = () => {
   const register = async (
@@ -66,31 +66,45 @@ export const useRegister = () => {
       onError,
     }: {
       onSuccess?: (data: unknown) => void;
-      onError?: (errors: { error: string; field: string; }[]) => void;
-    } = {}
+      onError?: (errors: { error: string; field: string }[]) => void;
+    } = {},
   ) => {
     try {
-      const data = await userGateway.register(body.name, body.email, body.password);
+      const data = await userGateway.register(
+        body.name,
+        body.email,
+        body.password,
+      );
       onSuccess?.(data);
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        if (error.response?.data.error === "User created, but failed to send confirmation email.") {
-          onError?.([{ error: "Houve algum problema", field: "name" }])
+        if (
+          error.response?.data.error ===
+          "User created, but failed to send confirmation email."
+        ) {
+          onError?.([{ error: "Houve algum problema", field: "name" }]);
           return;
         }
 
         const errorTranslations: Record<string, string> = {
           "Email format invalid": "Formato de email inválido",
           "Email already registered": "Email já cadastrado",
-          "Password must contain at least one number": "A senha deve conter pelo menos um número",
-          "Password must be at least 8 characters long": "A senha deve ter pelo menos 8 caracteres",
+          "Password must contain at least one number":
+            "A senha deve conter pelo menos um número",
+          "Password must be at least 8 characters long":
+            "A senha deve ter pelo menos 8 caracteres",
         };
 
-        const axiosError = error as AxiosError<{ errors?: { error: string; field: string }[]; error?: string }>;
-        const translatedMessages = axiosError.response?.data.errors?.map(msg => ({
-          error: errorTranslations[msg.error] || msg.error,
-          field: msg.field
-        }));
+        const axiosError = error as AxiosError<{
+          errors?: { error: string; field: string }[];
+          error?: string;
+        }>;
+        const translatedMessages = axiosError.response?.data.errors?.map(
+          (msg) => ({
+            error: errorTranslations[msg.error] || msg.error,
+            field: msg.field,
+          }),
+        );
 
         onError?.(translatedMessages ?? []);
       }
@@ -98,16 +112,16 @@ export const useRegister = () => {
   };
 
   return { register };
-}
+};
 
 export const confirmRegister = async (token: string) => {
   const data = await userGateway.confirmRegister(token);
-  return data; 
-}
+  return data;
+};
 
 export const useGetUser = () => {
   return useQuery({
-    queryKey: ['getUser'], 
+    queryKey: ["getUser"],
     queryFn: async () => {
       try {
         const data = await userGateway.getUser();
@@ -117,14 +131,14 @@ export const useGetUser = () => {
       }
     },
   });
-}
+};
 
 export const sendEmailResetPassword = async (email: string) => {
   const data = await userGateway.sendEmailResetPassword(email);
-  return data; 
-}
+  return data;
+};
 
 export const resetPassword = async (password: string, token: string) => {
   const data = await userGateway.resetPassword(password, token);
   return data;
-}
+};

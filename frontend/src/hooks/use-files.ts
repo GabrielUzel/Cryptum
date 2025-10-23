@@ -10,8 +10,8 @@ const fetchFiles = async (projectId: string) => {
 
 export const getFilesQueryOptions = (projectId: string) => {
   return {
-    queryKey: ['getFiles', projectId], 
-    queryFn: () => fetchFiles(projectId), 
+    queryKey: ["getFiles", projectId],
+    queryFn: () => fetchFiles(projectId),
     retry: false,
     refetchInterval: 30000,
     refetchOnWindowFocus: false,
@@ -20,34 +20,50 @@ export const getFilesQueryOptions = (projectId: string) => {
 
 export const useGetFiles = (projectId: string) => {
   return useQuery(getFilesQueryOptions(projectId));
-}
+};
 
 export const createFile = async (projectId: string, filename: string) => {
   const data = await filesGateway.createFile(projectId, filename);
   return data;
-}
+};
 
 export const uploadFiles = async (projectId: string, files: File[]) => {
   const data = await filesGateway.uploadFiles(projectId, files);
   return data;
-}
+};
 
-export const downloadFile = async (projectId: string, filename: string) => {
-  const data = await filesGateway.downloadFile(projectId, filename);
+export const downloadFile = async (projectId: string, fileId: string) => {
+  const data = await filesGateway.downloadFile(projectId, fileId);
   return data;
-}
+};
 
-export const updateFile = async (projectId: string, fileId: string, content: string) => {
+export const downloadFileForCompilation = async (
+  projectId: string,
+  fileId: string,
+) => {
+  const data = await filesGateway.downloadFileForCompilation(projectId, fileId);
+  return data;
+};
+
+export const updateFile = async (
+  projectId: string,
+  fileId: string,
+  content: string,
+) => {
   const data = await filesGateway.updateFile(projectId, fileId, content);
   return data;
-}
+};
 
-export const renameFile = async (projectId: string, fileId: string, newFileName: string) => {
+export const renameFile = async (
+  projectId: string,
+  fileId: string,
+  newFileName: string,
+) => {
   const data = await filesGateway.renameFile(projectId, fileId, newFileName);
   return data;
-}
+};
 
 export const deleteFile = async (projectId: string, fileId: string) => {
   const data = await filesGateway.deleteFile(projectId, fileId);
   return data;
-}
+};

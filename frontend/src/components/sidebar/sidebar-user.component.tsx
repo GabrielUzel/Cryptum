@@ -1,6 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 
 type SidebarUserProps = {
@@ -8,15 +14,13 @@ type SidebarUserProps = {
   handleUserLogout: () => void;
 };
 
-export default function SidebarUser(
-  props: SidebarUserProps
-) {
-  const { name, handleUserLogout } = props;  
-  
+export default function SidebarUser(props: SidebarUserProps) {
+  const { name, handleUserLogout } = props;
+
   const handleLogout = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     handleUserLogout();
-  }
+  };
 
   return (
     <DropdownMenu>
@@ -32,20 +36,26 @@ export default function SidebarUser(
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-backgrond border-card">
         <DropdownMenuItem className="text-white m-0 p-0 data-[highlighted]:bg-primary data-[highlighted]:text-white">
-          <Link href="/profile" className="hover:bg-primary cursor-pointer w-full h-full p-2 rounded-sm">
+          <Link
+            href="/profile"
+            className="hover:bg-primary cursor-pointer w-full h-full p-2 rounded-sm"
+          >
             Perfil
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="text-white m-0 p-0 data-[highlighted]:bg-primary data-[highlighted]:text-white">
-          <Link href="/settings" className="hover:bg-primary cursor-pointer w-full h-full p-2 rounded-sm">
+          <Link
+            href="/settings"
+            className="hover:bg-primary cursor-pointer w-full h-full p-2 rounded-sm"
+          >
             Configurações
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-card"/>
+        <DropdownMenuSeparator className="bg-card" />
         <DropdownMenuItem className="text-white m-0 p-0 data-[highlighted]:bg-card">
-          <Button 
-            onClick={(event) => handleLogout(event)} 
-            variant="ghost" 
+          <Button
+            onClick={(event) => handleLogout(event)}
+            variant="ghost"
             className="hover:bg-primary hover:text-white cursor-pointer w-full h-full p-2 m-0 rounded-sm justify-start"
           >
             Sair
