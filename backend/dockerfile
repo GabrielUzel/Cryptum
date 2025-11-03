@@ -1,0 +1,26 @@
+FROM elixir:1.17.3-erlang-27-alpine
+
+RUN apk add --no-cache build-base git postgresql-dev nodejs npm
+
+RUN elixir --version
+RUN erl -version
+
+WORKDIR /app
+
+RUN mix local.hex --force && mix local.rebar --force
+
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only prod
+
+COPY . .
+RUN mix compile
+
+RUN npm install -g npm@11.6.2
+RUN node --version && npm --version
+
+RUN mix assets.deploy
+RUN mix phx.digest
+
+RUN mix release
+
+CMD ["_build/prod/rel/your_app/bin/your_app", "start"]
