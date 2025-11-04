@@ -1,6 +1,6 @@
 FROM elixir:1.17-alpine
 
-RUN apk add --no-cache build-base git postgresql-dev nodejs npm bash postgresql-client
+RUN apk add --no-cache build-base git postgresql-dev nodejs npm postgresql-client netcat-openbsd
 
 RUN elixir --version
 RUN erl -version
@@ -27,4 +27,4 @@ COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["_build/prod/rel/your_app/bin/your_app", "start"]
+CMD ["_build/prod/rel/backend/bin/backend", "start"]
