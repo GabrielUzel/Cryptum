@@ -1,8 +1,10 @@
 import Config
 
-if File.exists?(".env") do
+env_path = Path.join([__DIR__, "..", "..", ".env"])
+
+if File.exists?(env_path) do
   import Dotenvy
-  source!([".env"])
+  source!([env_path])
 end
 
 if System.get_env("PHX_SERVER") do
@@ -10,17 +12,18 @@ if System.get_env("PHX_SERVER") do
 end
 
 if config_env() == :prod do
-  database_url = System.get_env("DATABASE_URL")
+  database_url = env!("DATABASE_URL")
+  secret_key_base = env!("SECRET_KEY_BASE")
+  port = env!("PORT")
+  host = env!("PHX_HOST")
+  pool_size = env!("POOL_SIZE")
+
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :backend, Backend.Repo,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE")),
+    pool_size: String.to_integer(pool_size),
     socket_options: maybe_ipv6
-
-  secret_key_base = System.get_env("SECRET_KEY_BASE")
-  host = System.get_env("PHX_HOST")
-  port = String.to_integer(System.get_env("PORT"))
 
   config :backend, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
@@ -28,51 +31,51 @@ if config_env() == :prod do
     url: [host: host, port: 443, scheme: "https"],
     http: [
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: port
+      port: String.to_integer(port)
     ],
     secret_key_base: secret_key_base
 
   config :azurex, Azurex.Blob.Config,
-    api_url: System.get_env("AZURE_API_URL"),
+    api_url: env!("AZURE_API_URL"),
     default_container: "projectsfiles",
-    storage_account_name: System.get_env("AZURE_STORAGE_ACCOUNT_NAME"),
-    storage_account_key: System.get_env("AZURE_STORAGE_ACCOUNT_KEY")
+    storage_account_name: env!("AZURE_STORAGE_ACCOUNT_NAME"),
+    storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY")
 end
 
 if config_env() in [:dev, :test] do
   config :backend, Backend.Repo,
-    username: System.get_env("POSTGRES_USER"),
-    password: System.get_env("POSTGRES_PASSWORD"),
-    hostname: System.get_env("POSTGRES_HOST"),
-    database: System.get_env("POSTGRES_DB"),
-    port: String.to_integer(System.get_env("POSTGRES_PORT")),
-    pool_size: String.to_integer(System.get_env("POOL_SIZE")),
+    username: env!("POSTGRES_USER"),
+    password: env!("POSTGRES_PASSWORD"),
+    hostname: env!("POSTGRES_HOST"),
+    database: env!("POSTGRES_DB"),
+    port: String.to_integer(env!("POSTGRES_PORT")),
+    pool_size: String.to_integer(env!("POOL_SIZE")),
     stacktrace: true,
     show_sensitive_data_on_connection_error: true
 
   config :backend, Backend.GuardianAuth,
     issuer: "backend",
-    secret_key: System.get_env("GUARDIAN_SECRET")
+    secret_key: env!("GUARDIAN_SECRET")
 
   config :backend, BackendWeb.Endpoint,
-    http: [ip: {0, 0, 0, 0}, port: String.to_integer(System.get_env("PORT"))],
-    secret_key_base: System.get_env("SECRET_KEY_BASE"),
+    http: [ip: {0, 0, 0, 0}, port: String.to_integer(env!("PORT"))],
+    secret_key_base: env!("SECRET_KEY_BASE"),
     check_origin: false,
     code_reloader: true,
     debug_errors: true,
     watchers: []
 
   config :azurex, Azurex.Blob.Config,
-    api_url: System.get_env("AZURE_API_URL"),
+    api_url: env!("AZURE_API_URL"),
     default_container: "projectsfiles",
-    storage_account_name: System.get_env("AZURE_STORAGE_ACCOUNT_NAME"),
-    storage_account_key: System.get_env("AZURE_STORAGE_ACCOUNT_KEY")
+    storage_account_name: env!("AZURE_STORAGE_ACCOUNT_NAME"),
+    storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY")
 
   config :backend, Backend.Mailer,
     adapter: Swoosh.Adapters.SMTP,
     relay: "smtp.gmail.com",
-    username: System.get_env("GMAIL_USERNAME"),
-    password: System.get_env("GMAIL_APP_PASSWORD"),
+    username: env!("GMAIL_USERNAME"),
+    password: env!("GMAIL_APP_PASSWORD"),
     port: 587,
     ssl: false,
     tls: :always,

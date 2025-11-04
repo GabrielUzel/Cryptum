@@ -1,26 +1,23 @@
 FROM elixir:1.17-alpine
 
-RUN apk add --no-cache build-base git postgresql-dev nodejs npm postgresql-client netcat-openbsd
-
-RUN elixir --version
-RUN erl -version
+RUN apk add --no-cache build-base git postgresql-dev nodejs npm
 
 WORKDIR /app
 
 ENV MIX_ENV=prod
+
 RUN mix local.hex --force && mix local.rebar --force
 
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only prod
 
+COPY ../.env ./
+
 COPY . .
 RUN mix compile
 
 RUN npm install -g npm@11.6.2
-RUN node --version && npm --version
-
 RUN mix phx.digest
-
 RUN mix release
 
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
