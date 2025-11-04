@@ -6,7 +6,7 @@ RUN node --version
 RUN npm --version
 
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --legacy-peer-deps
 
 COPY . .
 

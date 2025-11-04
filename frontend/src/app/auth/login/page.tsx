@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import LoginForm from "@/components/auth/login-form.component";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,9 @@ export default function Login() {
           <p className="text-lg">Faça login para continuar</p>
         </div>
         <CardContent className="flex flex-col gap-4">
-          <LoginForm />
+          <Suspense fallback={<div>Carregando...</div>}>
+            <LoginForm />
+          </Suspense>
           <div>
             <p className="text-sm">
               Não é cadastrado?{" "}

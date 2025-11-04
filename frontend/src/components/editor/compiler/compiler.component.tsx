@@ -21,9 +21,9 @@ export default function Compiler(props: CompilerProps) {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [compiledFilename, setCompiledFilename] = useState<string>("");
+  const [compiledFilename] = useState<string>("");
 
-  const { mutateAsync, isPending, isError } = useCompile();
+  const { mutateAsync, isPending } = useCompile();
 
   const handleCompile = async () => {
     try {
