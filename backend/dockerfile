@@ -1,6 +1,6 @@
 FROM elixir:1.17-alpine
 
-RUN apk add --no-cache build-base git postgresql-dev nodejs npm
+RUN apk add --no-cache build-base git postgresql-dev nodejs npm postgresql-client
 
 WORKDIR /app
 
@@ -11,17 +11,19 @@ RUN mix local.hex --force && mix local.rebar --force
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only prod
 
-COPY .env ./
-
 COPY . .
 RUN mix compile
 
 RUN npm install -g npm@11.6.2
 RUN mix phx.digest
-RUN mix release
 
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+RUN echo '#!/bin/sh\n\
+  until pg_isready -h db -p 5432 -U $POSTGRES_USER; do\n\
+  echo "Waiting for database..."\n\
+  sleep 2\n\
+  done\n\
+  echo "Database is ready!"\n\
+  mix ecto.migrate\n\
+  mix phx.server' > /app/start.sh && chmod +x /app/start.sh
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["_build/prod/rel/backend/bin/backend", "start"]
+CMD ["/app/start.sh"]
