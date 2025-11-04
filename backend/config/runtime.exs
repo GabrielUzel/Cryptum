@@ -1,10 +1,8 @@
 import Config
 
-env_path = Path.join([__DIR__, "..", "..", ".env"])
-
-if File.exists?(env_path) do
+if File.exists?(".env") do
   import Dotenvy
-  source!([env_path])
+  source!([".env"])
 end
 
 if System.get_env("PHX_SERVER") do

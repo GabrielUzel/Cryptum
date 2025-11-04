@@ -11,7 +11,7 @@ RUN mix local.hex --force && mix local.rebar --force
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only prod
 
-COPY ../.env ./
+COPY .env ./
 
 COPY . .
 RUN mix compile
