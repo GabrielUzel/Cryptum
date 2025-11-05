@@ -62,8 +62,7 @@ defmodule BackendWeb.LoginController do
 
       user ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "reset_password", user.id)
-        # Mudar url em produção
-        reset_url = "http://localhost:3000/auth/reset-password/confirmation?token=#{token}"
+        reset_url = "http://10.0.24.74:8080/auth/reset-password/confirmation?token=#{token}"
 
         case MailerHandler.reset_password(email, reset_url) do
           {:ok, _} ->
