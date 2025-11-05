@@ -3,6 +3,8 @@ services:
     build: ./frontend
     ports:
       - "3117:3117"
+    env_file:
+      - .env
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     depends_on:
@@ -11,26 +13,53 @@ services:
   backend:
     build: ./backend
     ports:
-      - "4117:4117"
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DB=${MYSQL_DB}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - POOL_SIZE=${POOL_SIZE}
+      - PORT=${PORT}
+      - MIX_ENV=prod
+      - GUARDIAN_SECRET=${GUARDIAN_SECRET}
+      - PHX_HOST=${PHX_HOST}
+      - DNS_CLUSTER_QUERY=${DNS_CLUSTER_QUERY}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: on-failure
 
   db:
-    image: postgres:16-alpine
+    image: mysql:8.0
+    restart: unless-stopped
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+    ports:
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysql -uroot -p$${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 80s
 
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - "8080:80"
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
@@ -39,4 +68,4 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  mysql_data:

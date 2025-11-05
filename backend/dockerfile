@@ -1,20 +1,42 @@
-FROM elixir:1.17-alpine
+FROM elixir:1.17-slim AS build
+ENV MIX_ENV=prod
 
-RUN apk add --no-cache build-base git postgresql-dev nodejs npm
+RUN apt-get update && \
+  apt-get install -y build-essential git curl npm && \
+  rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-ENV MIX_ENV=prod
-
-RUN mix local.hex --force && mix local.rebar --force
-
 COPY mix.exs mix.lock ./
+RUN mix local.hex --force && mix local.rebar --force
 RUN mix deps.get --only prod
+RUN mix deps.compile
 
 COPY . .
 RUN mix compile
+RUN mix release --overwrite
 
-RUN npm install -g npm@11.6.2
-RUN mix phx.digest
+FROM debian:bookworm-slim AS runner
 
-CMD sh -c "echo 'Waiting for database...' && sleep 20 && echo 'Running migrations...' && mix ecto.migrate && echo 'Starting server...' && mix phx.server"
+RUN apt-get update && \
+  apt-get install -y openssl ncurses-bin libssl3 locales netcat-openbsd && \
+  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen en_US.UTF-8 && \
+  rm -rf /var/lib/apt/lists/*
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV MIX_ENV=prod
+ENV HOME=/app
+
+WORKDIR /app
+
+COPY --from=build /app/_build/prod/rel/backend ./
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+EXPOSE 4117
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["bin/backend", "start"]

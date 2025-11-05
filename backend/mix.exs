@@ -5,11 +5,12 @@ defmodule Backend.MixProject do
     [
       app: :backend,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -17,6 +18,15 @@ defmodule Backend.MixProject do
     [
       mod: {Backend.Application, []},
       extra_applications: [:logger, :runtime_tools]
+    ]
+  end
+
+  def releases do
+    [
+      backend: [
+        include_executables_for: [:unix],
+        applications: [runtime_tools: :permanent]
+      ]
     ]
   end
 

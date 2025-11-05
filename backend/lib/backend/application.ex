@@ -3,9 +3,22 @@ defmodule Backend.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
+    base_children = [
       BackendWeb.Telemetry,
-      Backend.Repo,
+      Backend.Repo
+    ]
+
+    opts = [strategy: :one_for_one, name: Backend.BaseSupervisor]
+    {:ok, base_sup} = Supervisor.start_link(base_children, opts)
+
+    if System.get_env("MIX_ENV") == "prod" do
+      case Backend.Release.migrate!() do
+        :ok -> :ok
+        _ -> exit({:shutdown, :migrate_failed})
+      end
+    end
+
+    remaining_children = [
       {Phoenix.PubSub, name: Backend.PubSub},
       {Finch, name: Swoosh.Finch},
       BackendWeb.Endpoint,
@@ -13,8 +26,10 @@ defmodule Backend.Application do
       Backend.Document.Supervisor
     ]
 
-    opts = [strategy: :one_for_one, name: Backend.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(remaining_children,
+      strategy: :one_for_one,
+      name: Backend.Supervisor
+    )
   end
 
   @impl true
