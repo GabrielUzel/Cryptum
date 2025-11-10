@@ -18,19 +18,15 @@ services:
     env_file:
       - .env
     environment:
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_DB=${MYSQL_DB}
-      - MYSQL_PORT=${MYSQL_PORT}
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
+      - DATABASE_URL=mysql://${DB_USERNAME}:${DB_PASSWORD}@db:3306/${DB_NAME}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - POOL_SIZE=${POOL_SIZE}
-      - PORT=${PORT}
-      - MIX_ENV=prod
       - GUARDIAN_SECRET=${GUARDIAN_SECRET}
-      - PHX_HOST=${PHX_HOST}
-      - DNS_CLUSTER_QUERY=${DNS_CLUSTER_QUERY}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - AZURE_API_URL=${AZURE_API_URL}
+      - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME}
+      - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY}
+      - GMAIL_USERNAME=${GMAIL_USERNAME}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -38,24 +34,13 @@ services:
 
   db:
     image: mysql:8.0
-    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DB}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysql -uroot -p$${MYSQL_ROOT_PASSWORD} -e 'SELECT 1' || exit 1",
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 80s
 
   nginx:
     image: nginx:alpine

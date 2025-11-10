@@ -30,7 +30,7 @@ export default function FilesManager(props: FilesManagerProps) {
   };
 
   return (
-    <section className="bg-card rounded-lg">
+    <section className="bg-card rounded-lg min-w-80">
       <div className="bg-primary relative flex p-2 items-center rounded-tl-lg rounded-tr-lg">
         <NewFileDialog projectId={projectId} />
       </div>

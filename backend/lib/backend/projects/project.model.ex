@@ -6,10 +6,10 @@ defmodule Backend.Projects.Project do
   @primary_key {:id, :binary_id, autogenerate: true}
   @derive {Phoenix.Param, key: :id}
   schema "projects" do
-    field :name, :string
-    field :description, :string
+    field(:name, :string)
+    field(:description, :string)
 
-    has_many :project_members, Backend.Projects.ProjectMember, foreign_key: :project_id
+    has_many(:project_members, Backend.Projects.ProjectMember, foreign_key: :project_id)
     timestamps()
   end
 

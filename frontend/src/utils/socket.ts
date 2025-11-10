@@ -11,7 +11,10 @@ export async function createSocket() {
 
     const { token } = data;
 
-    const socket = new Socket("ws://localhost:4000/socket", {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const socketUrl = apiUrl.replace(/^http/, "ws") + "/socket";
+
+    const socket = new Socket(socketUrl, {
       params: { token },
     });
 

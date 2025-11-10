@@ -6,10 +6,10 @@ defmodule Backend.Files.File do
   @primary_key {:id, :binary_id, autogenerate: true}
   @derive {Phoenix.Param, key: :id}
   schema "files" do
-    field :filename, :string
-    field :content_type, :string
-    field :path, :string
-    field :project_id, :binary_id
+    field(:filename, :string)
+    field(:content_type, :string)
+    field(:path, :string)
+    field(:project_id, :binary_id)
 
     timestamps()
   end

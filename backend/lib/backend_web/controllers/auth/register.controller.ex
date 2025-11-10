@@ -1,5 +1,6 @@
 defmodule BackendWeb.RegisterController do
   use BackendWeb, :controller
+  alias Backend.Repo
   alias Backend.AccountsRepository
   alias Backend.TranslateMessages
   alias BackendWeb.MailerHandler
@@ -11,40 +12,48 @@ defmodule BackendWeb.RegisterController do
       "password" => password
     }
 
-    case AccountsRepository.create_user(user_params) do
-      {:ok, user} ->
+    frontend_base_url =
+      Application.get_env(:backend, :frontend_url) || "http://localhost:3000"
+
+    result =
+      Ecto.Multi.new()
+      |> Ecto.Multi.run(:create_user, fn _repo, _changes ->
+        AccountsRepository.create_user(user_params)
+      end)
+      |> Ecto.Multi.run(:send_email, fn _repo, %{create_user: user} ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "confirm", user.id, max_age: 86400)
-
-        frontend_base_url =
-          Application.get_env(:backend, :frontend_url) || "http://localhost:3000"
-
-        confirmation_url = frontend_base_url <> "/auth/register/confirm?token=#{token}"
+        confirmation_url = "#{frontend_base_url}/auth/register/confirm?token=#{token}"
 
         case MailerHandler.confirm_register(email, confirmation_url) do
-          {:ok, _} ->
-            conn
-            |> put_status(:created)
-            |> json(
-              TranslateMessages.as_single_success(
-                "User created successfully. A confirmation email has been sent."
-              )
-            )
-
-          {:error, _} ->
-            conn
-            |> put_status(:internal_server_error)
-            # TODO: User still exists if email failed, delete user if this happens
-            |> json(
-              TranslateMessages.as_single_error(
-                "User created, but failed to send confirmation email."
-              )
-            )
+          {:ok, response} -> {:ok, response}
+          {:error, reason} -> {:error, reason}
         end
+      end)
+      |> Repo.transaction()
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+    case result do
+      {:ok, %{create_user: _user}} ->
+        conn
+        |> put_status(:created)
+        |> json(
+          TranslateMessages.as_single_success(
+            "User created successfully. A confirmation email has been sent."
+          )
+        )
+
+      {:error, :create_user, changeset, _changes} ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(TranslateMessages.as_error_array(changeset))
+
+      {:error, :send_email, _reason, _changes} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(
+          TranslateMessages.as_single_error(
+            "Failed to send confirmation email. Please try again."
+          )
+        )
     end
   end
 

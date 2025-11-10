@@ -62,7 +62,11 @@ defmodule BackendWeb.LoginController do
 
       user ->
         token = Phoenix.Token.sign(BackendWeb.Endpoint, "reset_password", user.id)
-        reset_url = "http://10.0.24.74:8080/auth/reset-password/confirmation?token=#{token}"
+
+        frontend_base_url =
+          Application.get_env(:backend, :frontend_url) || "http://localhost:3000"
+
+        reset_url = "#{frontend_base_url}/auth/reset-password/confirmation?token=#{token}"
 
         case MailerHandler.reset_password(email, reset_url) do
           {:ok, _} ->

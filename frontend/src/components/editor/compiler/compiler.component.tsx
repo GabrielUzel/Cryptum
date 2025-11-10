@@ -81,15 +81,15 @@ export default function Compiler(props: CompilerProps) {
   }, [pdfUrl]);
 
   return (
-    <section className="flex-1 bg-card p-4 rounded-lg flex flex-col">
-      <div className="flex-1 flex items-center justify-center min-h-[400px]">
+    <section className="flex-1 bg-card px-4 rounded-lg flex flex-col h-full">
+      <div className="flex-1 flex items-center justify-center min-h-0 my-4">
         {isPending ? (
           <div className="text-center">
             <p>Compilando arquivo...</p>
           </div>
         ) : pdfUrl ? (
-          <div className="w-full h-full flex flex-col">
-            <div className="flex-1 flex justify-center">
+          <div className="w-full h-full overflow-auto flex justify-center border rounded-lg">
+            <div className="">
               <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page pageNumber={pageNumber} />
               </Document>
@@ -106,7 +106,7 @@ export default function Compiler(props: CompilerProps) {
         )}
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex-shrink-0 pb-4 pt-4 flex justify-between">
         <div className="flex gap-2">
           <Button
             onClick={handleCompile}
@@ -127,7 +127,7 @@ export default function Compiler(props: CompilerProps) {
         </div>
         {pdfUrl && (
           <div className="flex gap-4 items-center">
-            <p className="">
+            <p className="text-sm">
               Página {pageNumber} de {numPages}
             </p>
             <div className="flex gap-2">

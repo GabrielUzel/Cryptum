@@ -5,11 +5,11 @@ defmodule Backend.Accounts.User do
   @primary_key {:id, :binary_id, autogenerate: true}
   @derive {Phoenix.Param, key: :id}
   schema "users" do
-    field :name, :string
-    field :email, :string
-    field :password, :string, virtual: true, redact: true
-    field :hashed_password, :string, redact: true
-    field :email_confirmed, :boolean, default: false
+    field(:name, :string)
+    field(:email, :string)
+    field(:password, :string, virtual: true, redact: true)
+    field(:hashed_password, :string, redact: true)
+    field(:email_confirmed, :boolean, default: false)
 
     timestamps()
   end
