@@ -26,5 +26,13 @@ if ! wait_for_mysql; then
   exit 1
 fi
 
+echo "Running migrations..."
+/app/bin/backend eval "Backend.Release.migrate!()"
+
+if [ $? -ne 0 ]; then
+  echo "Migrations failed!"
+  exit 1
+fi
+
 echo "Starting application..."
 exec "$@"
