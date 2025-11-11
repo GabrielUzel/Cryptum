@@ -31,8 +31,7 @@ if config_env() == :prod do
 
   config :backend, Backend.Repo,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
+    pool_size: String.to_integer(System.get_env("POOL_SIZE"))
 
   config :backend, Backend.GuardianAuth,
     issuer: "backend",
@@ -61,7 +60,7 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
 end
 
 if config_env() in [:dev, :test] do

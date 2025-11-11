@@ -9,7 +9,7 @@ defmodule Backend.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Backend.BaseSupervisor]
-    {:ok, base_sup} = Supervisor.start_link(base_children, opts)
+    {:ok, _} = Supervisor.start_link(base_children, opts)
 
     if System.get_env("MIX_ENV") == "prod" do
       case Backend.Release.migrate!() do

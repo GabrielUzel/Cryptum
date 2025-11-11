@@ -7,12 +7,19 @@ import { Button } from "@/components/ui/button";
 import { useCompile } from "@/hooks/use-compile";
 import { downloadFileForCompilation } from "@/hooks/use-files";
 import Image from "next/image";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+import { AxiosError } from "axios";
 
 type CompilerProps = {
   projectId: string;
   currentFileId: string | null;
+};
+
+type CompileResult = {
+  pdf?: string;
+  log?: string;
+  error?: string[];
+  message?: string;
+  filename?: string;
 };
 
 export default function Compiler(props: CompilerProps) {
@@ -22,6 +29,10 @@ export default function Compiler(props: CompilerProps) {
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [compiledFilename] = useState<string>("");
+  const [compileResult, setCompileResult] = useState<CompileResult | null>(
+    null,
+  );
+  const [showLogs, setShowLogs] = useState(false);
 
   const { mutateAsync, isPending } = useCompile();
 
@@ -33,6 +44,9 @@ export default function Compiler(props: CompilerProps) {
 
       const file = await downloadFileForCompilation(projectId, currentFileId);
       const result = await mutateAsync(file);
+
+      setCompileResult(result);
+      setShowLogs(false);
 
       if (result.pdf) {
         const binaryString = atob(result.pdf);
@@ -47,11 +61,17 @@ export default function Compiler(props: CompilerProps) {
 
         setPdfBlob(blob);
         setPdfUrl(url);
+      } else {
+        setPdfUrl(undefined);
+        setPdfBlob(null);
       }
-    } catch (error) {
-      console.error("Erro na compilação:", error);
-      setPdfUrl(undefined);
-      setPdfBlob(null);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        setCompileResult(error.response?.data || null);
+        setPdfUrl(undefined);
+        setPdfBlob(null);
+        setShowLogs(true);
+      }
     }
   };
 
@@ -72,6 +92,25 @@ export default function Compiler(props: CompilerProps) {
     }
   };
 
+  const renderLogContent = () => {
+    if (!compileResult) return null;
+
+    const isError = "error" in compileResult;
+    const logContent = isError
+      ? compileResult.error?.join("\n")
+      : compileResult.log;
+
+    return (
+      <div className={`w-full h-full overflow-auto bg-white rounded-lg p-4`}>
+        <pre
+          className={`${isError ? "bg-red-100 text-red-900" : "bg-green-100 text-green-900"} p-3 rounded text-xs overflow-x-auto whitespace-pre-wrap`}
+        >
+          {logContent}
+        </pre>
+      </div>
+    );
+  };
+
   useEffect(() => {
     return () => {
       if (pdfUrl) {
@@ -83,19 +122,34 @@ export default function Compiler(props: CompilerProps) {
   return (
     <section className="flex-1 bg-card px-4 rounded-lg flex flex-col h-full">
       <div className="flex-1 flex items-center justify-center min-h-0 my-4">
-        {isPending ? (
+        {isPending && (
           <div className="text-center">
             <p>Compilando arquivo...</p>
           </div>
-        ) : pdfUrl ? (
-          <div className="w-full h-full overflow-auto flex justify-center border rounded-lg">
-            <div className="">
-              <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-                <Page pageNumber={pageNumber} />
+        )}
+
+        {!isPending && showLogs && compileResult && renderLogContent()}
+
+        {!isPending && !showLogs && pdfUrl && (
+          <div className="w-full h-full overflow-auto flex justify-center border rounded-lg border-card">
+            <div>
+              <Document
+                file={pdfUrl}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={null}
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  renderAnnotationLayer={false}
+                  renderTextLayer={false}
+                  loading={null}
+                />
               </Document>
             </div>
           </div>
-        ) : (
+        )}
+
+        {!isPending && !showLogs && !pdfUrl && (
           <div className="text-center">
             <p className="text-muted-foreground">
               {currentFileId
@@ -115,17 +169,28 @@ export default function Compiler(props: CompilerProps) {
           >
             {isPending ? "Compilando..." : "Compilar"}
           </Button>
-          {pdfUrl && (
-            <Button
-              onClick={handleDownloadPdf}
-              className="cursor-pointer"
-              variant="secondary"
-            >
-              Baixar PDF
-            </Button>
+          {compileResult && (
+            <>
+              {pdfUrl && !showLogs && (
+                <Button
+                  onClick={handleDownloadPdf}
+                  className="cursor-pointer"
+                  variant="secondary"
+                >
+                  Baixar PDF
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowLogs(!showLogs)}
+                className="cursor-pointer border-white hover:bg-card/80 hover:text-white"
+                variant="outline"
+              >
+                {showLogs ? "Ver PDF" : "Ver Logs"}
+              </Button>
+            </>
           )}
         </div>
-        {pdfUrl && (
+        {pdfUrl && !showLogs && (
           <div className="flex gap-4 items-center">
             <p className="text-sm">
               Página {pageNumber} de {numPages}
