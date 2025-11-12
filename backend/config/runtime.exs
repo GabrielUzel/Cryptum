@@ -35,7 +35,7 @@ config :backend, Backend.GuardianAuth,
 
 config :azurex, Azurex.Blob.Config,
   api_url: System.fetch_env!("AZURE_API_URL"),
-  default_container: "projectsfiles",
+  default_container: "cryptumblob",
   storage_account_name: System.fetch_env!("AZURE_STORAGE_ACCOUNT_NAME"),
   storage_account_key: System.fetch_env!("AZURE_STORAGE_ACCOUNT_KEY")
 
