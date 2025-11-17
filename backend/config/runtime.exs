@@ -22,7 +22,8 @@ config :backend, BackendWeb.Endpoint,
     ip: {0, 0, 0, 0, 0, 0, 0, 0},
     port: String.to_integer(System.get_env("PORT") || "4000")
   ],
-  secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
+  secret_key_base: System.fetch_env!("SECRET_KEY_BASE"),
+  check_origin: ["http://10.0.24.74:8080", "//10.0.24.74:8080"]
 
 config :backend, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
