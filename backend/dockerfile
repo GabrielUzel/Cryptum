@@ -19,8 +19,16 @@ RUN mix release --overwrite
 FROM debian:bookworm-slim AS runner
 
 RUN apt-get update && \
-  apt-get install -y openssl ncurses-bin libssl3 locales netcat-openbsd && \
-  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen en_US.UTF-8 && \
+  apt-get install -y \
+  openssl \
+  ncurses-bin \
+  libssl3 \
+  locales \
+  netcat-openbsd \
+  texlive-latex-base \
+  texlive-fonts-recommended && \
+  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+  locale-gen en_US.UTF-8 && \
   rm -rf /var/lib/apt/lists/*
 
 ENV LANG=en_US.UTF-8
