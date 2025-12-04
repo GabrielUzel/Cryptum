@@ -1,50 +1,65 @@
 import Config
+import Dotenvy
+
+sources =
+  if config_env() == :dev do
+    [".env.dev", System.get_env()]
+  else
+    [System.get_env()]
+  end
+
+source!(sources)
 
 if config_env() == :prod do
   config :backend, BackendWeb.Endpoint, server: true
 end
 
 config :backend, Backend.Repo,
-  username: System.fetch_env!("MYSQL_USER"),
-  password: System.fetch_env!("MYSQL_PASSWORD"),
-  hostname: System.fetch_env!("MYSQL_HOST"),
-  database: System.fetch_env!("MYSQL_DB"),
-  port: String.to_integer(System.fetch_env!("MYSQL_PORT")),
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+  username: env!("DB_USER"),
+  password: env!("DB_PASSWORD"),
+  hostname: env!("DB_HOST"),
+  database: env!("DB_NAME"),
+  port: env!("DB_PORT") |> String.to_integer(),
+  pool_size: env!("POOL_SIZE") |> String.to_integer()
 
 config :backend, BackendWeb.Endpoint,
   url: [
-    host: System.get_env("PHX_HOST") || "localhost",
-    port: String.to_integer(System.get_env("PORT") || "4000"),
-    scheme: System.get_env("PHX_SCHEME") || "http"
+    host: env!("PHX_HOST"),
+    port: env!("PORT") |> String.to_integer(),
+    scheme: "http"
   ],
   http: [
     ip: {0, 0, 0, 0, 0, 0, 0, 0},
-    port: String.to_integer(System.get_env("PORT") || "4000")
+    port: env!("PORT") |> String.to_integer()
   ],
-  secret_key_base: System.fetch_env!("SECRET_KEY_BASE"),
-  check_origin: ["http://10.0.24.74:8080", "//10.0.24.74:8080"]
+  secret_key_base: env!("SECRET_KEY_BASE"),
+  check_origin: [
+    "http://10.0.24.74:8080",
+    "//10.0.24.74:8080",
+    "http://localhost:3117",
+    "//localhost:3117"
+  ]
 
-config :backend, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+config :backend, :dns_cluster_query, env!("DNS_CLUSTER_QUERY")
 
 config :backend,
-  frontend_url: System.get_env("FRONTEND_URL") || "http://localhost:3000"
+  frontend_url: env!("FRONTEND_URL")
 
 config :backend, Backend.GuardianAuth,
   issuer: "backend",
-  secret_key: System.fetch_env!("GUARDIAN_SECRET")
+  secret_key: env!("GUARDIAN_SECRET")
 
 config :azurex, Azurex.Blob.Config,
-  api_url: System.fetch_env!("AZURE_API_URL"),
+  api_url: env!("AZURE_API_URL"),
   default_container: "cryptumblob",
-  storage_account_name: System.fetch_env!("AZURE_STORAGE_ACCOUNT_NAME"),
-  storage_account_key: System.fetch_env!("AZURE_STORAGE_ACCOUNT_KEY")
+  storage_account_name: env!("AZURE_STORAGE_ACCOUNT_NAME"),
+  storage_account_key: env!("AZURE_STORAGE_ACCOUNT_KEY")
 
 config :backend, Backend.Mailer,
   adapter: Swoosh.Adapters.SMTP,
   relay: "smtp.gmail.com",
-  username: System.fetch_env!("GMAIL_USERNAME"),
-  password: System.fetch_env!("GMAIL_APP_PASSWORD"),
+  username: env!("GMAIL_USERNAME"),
+  password: env!("GMAIL_APP_PASSWORD"),
   port: 587,
   ssl: false,
   tls: :always,

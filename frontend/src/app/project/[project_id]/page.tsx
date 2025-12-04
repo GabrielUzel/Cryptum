@@ -60,14 +60,14 @@ export default function ProjectPage() {
             isFileEditable ? (
               <ColaborativeEditor fileId={currentFileId} />
             ) : (
-              <div className="flex-[2] bg-card p-4 rounded-lg">
+              <div className="flex-2 bg-card p-4 rounded-lg">
                 <p className="text-center text-muted-foreground mt-20">
                   Este arquivo não é editável
                 </p>
               </div>
             )
           ) : (
-            <div className="flex-[2] bg-card p-4 rounded-lg">
+            <div className="flex-2 bg-card p-4 rounded-lg">
               <p className="text-center text-muted-foreground mt-20">
                 Selecione um arquivo para editar
               </p>

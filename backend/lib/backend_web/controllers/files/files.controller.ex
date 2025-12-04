@@ -82,16 +82,6 @@ defmodule BackendWeb.FilesController do
     end
   end
 
-  # def update(conn, %{"project_id" => project_id, "file_id" => file_id, "content" => content}) do
-  #   user_id = get_current_user_id(conn)
-
-  #   case FilesService.update_file(user_id, project_id, file_id, content) do
-  #     {:ok, file} -> json(conn, file)
-  #     {:error, :not_authorized} -> send_resp(conn, 403, "Not authorized")
-  #     {:error, reason} -> send_resp(conn, 400, inspect(reason))
-  #   end
-  # end
-
   def rename(conn, %{
         "project_id" => project_id,
         "file_id" => file_id,

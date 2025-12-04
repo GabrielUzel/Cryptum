@@ -11,7 +11,7 @@ defmodule Backend.Application do
     opts = [strategy: :one_for_one, name: Backend.BaseSupervisor]
     {:ok, _} = Supervisor.start_link(base_children, opts)
 
-    if System.get_env("MIX_ENV") == "prod" do
+    if Application.get_env(:backend, :environment) == :prod do
       case Backend.Release.migrate!() do
         :ok -> :ok
         _ -> exit({:shutdown, :migrate_failed})

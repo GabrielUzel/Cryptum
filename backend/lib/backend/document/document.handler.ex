@@ -9,6 +9,10 @@ defmodule Backend.Document do
 
   @save_interval 5_000
 
+  defp name(filename) do
+    {:via, Registry, {Backend.Registry, filename}}
+  end
+
   def start_link(filename) do
     GenServer.start_link(__MODULE__, filename, name: name(filename))
   end
@@ -97,14 +101,65 @@ defmodule Backend.Document do
 
   @impl true
   def handle_cast(:channel_joined, state) do
-    {:noreply, %{state | channel_count: state.channel_count + 1}}
+    new_state =
+      if state.channel_count == 0 do
+        # inicia autosave quando o primeiro cliente entra
+        timer = Process.send_after(self(), :autosave, @save_interval)
+        %{state | autosave_timer: timer}
+      else
+        state
+      end
+
+    {:noreply, %{new_state | channel_count: state.channel_count + 1}}
   end
 
   @impl true
   def handle_cast(:channel_left, state) do
     new_count = max(0, state.channel_count - 1)
-    {:noreply, %{state | channel_count: new_count}}
+
+    if new_count == 0 do
+      # último cliente saiu: faz um save final se estiver sujo e encerra
+      cleanup_resources(state)
+      {:stop, :normal, %{state | channel_count: 0}}
+    else
+      {:noreply, %{state | channel_count: new_count}}
+    end
   end
+
+  @impl true
+  def handle_info(:autosave, state) do
+    new_state =
+      if state.dirty do
+        content_to_save = extract_text_from_delta(state.content)
+
+        case FilesService.update_file(state.filename, content_to_save) do
+          {:ok, _} ->
+            :ok
+
+          {:error, reason} ->
+            Logger.error("Autosave failed for #{state.filename}: #{inspect(reason)}")
+        end
+
+        %{state | dirty: false}
+      else
+        state
+      end
+
+    if new_state.channel_count > 0 do
+      timer = Process.send_after(self(), :autosave, @save_interval)
+      {:noreply, %{new_state | autosave_timer: timer}}
+    else
+      {:noreply, %{new_state | autosave_timer: nil}}
+    end
+  end
+
+  @impl true
+  def terminate(_reason, state) do
+    cleanup_resources(state)
+    :ok
+  end
+
+  # ---------- helpers ----------
 
   defp load_content_from_azure(filename) do
     case FilesService.get_document_content(filename) do
@@ -113,13 +168,37 @@ defmodule Backend.Document do
     end
   end
 
-  defp transform(opA, opB) do
-    case TextDelta.transform(opA, opB) do
-      {:ok, transformed} ->
-        transformed
+  # converte text_delta -> string LaTeX
+  defp extract_text_from_delta(text_delta) do
+    quill = DeltaConverter.text_delta_to_quill(text_delta)
 
-      :error ->
-        opA
+    quill["ops"]
+    |> Enum.map(fn
+      %{"insert" => content} -> content
+      _ -> ""
+    end)
+    |> Enum.join()
+  end
+
+  defp cleanup_resources(state) do
+    if state.autosave_timer do
+      Process.cancel_timer(state.autosave_timer)
     end
+
+    if state.dirty do
+      content_to_save = extract_text_from_delta(state.content)
+
+      case FilesService.update_file(state.filename, content_to_save) do
+        {:ok, _} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Failed to save #{state.filename} to Azure on cleanup: #{inspect(reason)}")
+      end
+    end
+  end
+
+  defp transform(client_op, server_op) do
+    TextDelta.transform(server_op, client_op, :left)
   end
 end

@@ -1,6 +1,9 @@
 import { Socket } from "phoenix";
 import { getSocketToken } from "@/hooks/use-socket";
 
+const WS_HOST = process.env.NEXT_PUBLIC_SOCKET_HOST || "localhost";
+const WS_PORT = process.env.NEXT_PUBLIC_SOCKET_PORT || "4117";
+
 export async function createSocket() {
   try {
     const data = await getSocketToken();
@@ -11,7 +14,7 @@ export async function createSocket() {
 
     const { token } = data;
 
-    const socketUrl = "ws://10.0.24.74:4117/socket";
+    const socketUrl = `ws://${WS_HOST}:${WS_PORT}/socket`;
 
     const socket = new Socket(socketUrl, {
       params: { token },

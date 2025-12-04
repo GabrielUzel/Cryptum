@@ -60,6 +60,10 @@ export class FilesGateway {
         responseType: "blob",
       },
     );
+
+    console.log("download response", response.status, response.headers);
+    console.log("blob from backend", response.data, response.data?.size);
+
     const contentDisposition = response.headers["content-disposition"];
     let filename = "file.tex";
 
