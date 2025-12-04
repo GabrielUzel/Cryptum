@@ -6,7 +6,7 @@ import { createSocket } from "@/utils/socket";
 import Delta from "quill-delta";
 
 interface UpdatePayload {
-  change: Delta;
+  op: Delta;
   version: number;
 }
 
@@ -18,7 +18,7 @@ interface OpenPayload {
 
 export default function useDocumentChannel(
   fileId: string,
-  setContent: (content: Delta) => void,
+  applyRemoteDelta: (delta: Delta, kind: "open" | "update") => void,
 ) {
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef<Channel | null>(null);
@@ -88,10 +88,11 @@ export default function useDocumentChannel(
         }
 
         const contentDelta =
-          payload.content && payload.content.ops
+          payload.content && (payload.content as any).ops
             ? new Delta(payload.content)
             : new Delta();
-        setContent(contentDelta);
+
+        applyRemoteDelta(contentDelta, "open");
       }
     };
 
@@ -99,11 +100,12 @@ export default function useDocumentChannel(
       if (currentFileIdRef.current === fileId) {
         versionRef.current = payload.version;
 
-        const changeDelta =
-          payload.change && payload.change.ops
-            ? new Delta(payload.change)
+        const opDelta =
+          payload.op && (payload.op as any).ops
+            ? new Delta(payload.op)
             : new Delta();
-        setContent(changeDelta);
+
+        applyRemoteDelta(opDelta, "update");
       }
     };
 
@@ -125,7 +127,7 @@ export default function useDocumentChannel(
 
     cleanupRef.current = specificCleanup;
     return specificCleanup;
-  }, [fileId, setContent, cleanupChannel]);
+  }, [fileId, applyRemoteDelta, cleanupChannel]);
 
   const sendChange = (delta: Delta) => {
     if (userRole === "guest") {

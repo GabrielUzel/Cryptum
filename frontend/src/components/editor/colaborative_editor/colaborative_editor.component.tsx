@@ -45,23 +45,16 @@ export default function ColaborativeEditor(props: ColaborativeEditorProps) {
   }, [quill]);
 
   const applyContentToQuill = useCallback(
-    (content: Delta) => {
+    (delta: Delta, kind: "open" | "update") => {
       if (!quill || currentFileIdRef.current !== fileId) {
         return;
       }
 
-      const currentContent = quill.getContents();
-      const isEmptyEditor =
-        currentContent.length() <= 1 ||
-        (currentContent.ops.length === 1 &&
-          typeof currentContent.ops[0].insert === "string" &&
-          currentContent.ops[0].insert === "\n");
-
-      if (!isInitialContentSetRef.current || isEmptyEditor) {
-        quill.setContents(content, "silent");
+      if (kind === "open") {
+        quill.setContents(delta, "silent");
         isInitialContentSetRef.current = true;
       } else {
-        quill.updateContents(content, "api");
+        quill.updateContents(delta, "api");
       }
 
       updateLineNumbers();
